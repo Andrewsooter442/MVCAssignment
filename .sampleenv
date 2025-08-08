@@ -1,0 +1,9 @@
+MYSQL_HOST = '127.0.0.1'
+MYSQL_USER = 'kitchen'
+MYSQL_PASSWORD = 'god'
+MYSQL_DBNAME = 'kitchen'
+PORT = '3000'
+MYSQL_PORT = '3306'
+JWT_SECRET= 'your-secret-key'
+
+MaxActiveTables = 20
