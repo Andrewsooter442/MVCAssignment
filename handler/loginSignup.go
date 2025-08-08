@@ -18,7 +18,7 @@ func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "Failed to parse form data", http.StatusBadRequest)
 			return
 		}
-		fmt.Println(r.Form)
+		//	fmt.Println(r.Form)
 
 		var req model.LoginRequest
 		req.Username = r.FormValue("username")
@@ -31,8 +31,7 @@ func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		fmt.Println("Login attempt for:", req.Username)
-		fmt.Println(token)
+		//fmt.Println(token)
 
 		// Create a JWT token
 		jwtSecret := os.Getenv("JWT_SECRET")

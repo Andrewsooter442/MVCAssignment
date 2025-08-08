@@ -15,12 +15,12 @@ const userObject = "user"
 func (app *Application) HandleApiRequest(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path[len("/api/"):]
 	switch path {
-	case "editItem":
 	case "logout":
-
+		app.HandleLogout(w, r)
 	case "placeOrder":
 		app.HandlePlaceOrder(w, r)
 	case "completeOrderItem":
+
 		app.HandleCompleteOrderItem(w, r)
 	case "paymentDone":
 
