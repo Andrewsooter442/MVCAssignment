@@ -1,0 +1,57 @@
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) UNIQUE NOT NULL ,
+  mail VARCHAR(1024),
+  phone VARCHAR(20),
+  isAdmin BOOL NOT NULL,
+  isCheff BOOL NOT NULL,
+  score FLOAT DEFAULT 0 NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL 
+);
+
+CREATE TABLE orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  table_no INT NOT NULL,
+  complete BOOL NOT NULL DEFAULT FALSE,
+  FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE TABLE payment (
+  order_id INT NOT NULL,
+  user_id INT NOT NULL,
+  total FLOAT NOT NULL,
+  tip FLOAT DEFAULT 0 NOT NULL,
+  paid BOOL DEFAULT FALSE NOT NULL,
+  method VARCHAR(200) NOT NULL,
+  FOREIGN KEY(order_id) REFERENCES orders(id),
+  FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE TABLE categories (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(200) NOT NULL UNIQUE
+);
+
+CREATE TABLE items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  category_id INT NOT NULL, 
+  name VARCHAR(200) NOT NULL UNIQUE,
+  price FLOAT NOT NULL,
+  description VARCHAR(2000) NOT NULL,
+  FOREIGN KEY(category_id) REFERENCES categories(id)
+);
+
+CREATE TABLE order_items (
+  order_id INT NOT NULL,
+  item_id INT NOT NULL,
+  PRIMARY KEY(order_id,item_id),
+  quantity INT NOT NULL,
+  instruction VARCHAR(6000),
+  complete BOOL DEFAULT FALSE,
+  FOREIGN KEY(order_id) REFERENCES orders(id),
+  FOREIGN KEY(item_id) REFERENCES items(id)
+);
+
