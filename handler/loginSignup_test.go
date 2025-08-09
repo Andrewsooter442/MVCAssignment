@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"github.com/Andrewsooter442/MVCAssignment/config"
 	"testing"
+
+	"github.com/Andrewsooter442/MVCAssignment/config"
 )
 
 func TestValidateLoginRequest(t *testing.T) {

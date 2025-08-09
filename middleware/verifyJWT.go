@@ -3,9 +3,10 @@ package middleware
 import (
 	"context"
 	"fmt"
-	"github.com/Andrewsooter442/MVCAssignment/config"
 	"net/http"
 	"os"
+
+	"github.com/Andrewsooter442/MVCAssignment/config"
 
 	"github.com/golang-jwt/jwt/v5"
 )

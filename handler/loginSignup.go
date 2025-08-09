@@ -3,12 +3,13 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"github.com/Andrewsooter442/MVCAssignment/config"
-	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func validateLoginRequest(req config.LoginRequest) error {

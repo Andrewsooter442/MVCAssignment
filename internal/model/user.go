@@ -3,11 +3,12 @@ package model
 import (
 	"database/sql"
 	"errors"
+	"log"
+	"time"
+
 	"github.com/Andrewsooter442/MVCAssignment/config"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"time"
 )
 
 func (model *ModelConnection) CreateNewUser(user config.SignupRequest) error {

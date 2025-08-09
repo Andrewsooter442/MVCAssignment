@@ -2,9 +2,10 @@ package handler
 
 import (
 	"errors"
-	"github.com/Andrewsooter442/MVCAssignment/config"
 	"net/http"
 	"strconv"
+
+	"github.com/Andrewsooter442/MVCAssignment/config"
 )
 
 func (app *Application) HandleAdminRequest(w http.ResponseWriter, r *http.Request) {

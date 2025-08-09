@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Andrewsooter442/MVCAssignment/config"
 	"log"
 	"time"
+
+	"github.com/Andrewsooter442/MVCAssignment/config"
 )
 
 func (model *ModelConnection) PlaceOrder(order *config.Order) (int64, error) {

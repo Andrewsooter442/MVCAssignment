@@ -1,9 +1,10 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/Andrewsooter442/MVCAssignment/handler"
 	"github.com/Andrewsooter442/MVCAssignment/middleware"
-	"net/http"
 )
 
 func registerRoutes(mux *http.ServeMux, app *handler.Application) {

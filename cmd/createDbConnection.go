@@ -3,10 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/Andrewsooter442/MVCAssignment/handler"
-	"github.com/Andrewsooter442/MVCAssignment/internal/model"
 	"log"
 	"os"
+
+	"github.com/Andrewsooter442/MVCAssignment/handler"
+	"github.com/Andrewsooter442/MVCAssignment/internal/model"
 )
 
 func openDB(dsn string) (*sql.DB, error) {

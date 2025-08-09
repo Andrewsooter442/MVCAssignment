@@ -3,11 +3,12 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"github.com/Andrewsooter442/MVCAssignment/config"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/Andrewsooter442/MVCAssignment/config"
 )
 
 const userObject = "user"

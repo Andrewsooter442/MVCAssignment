@@ -3,9 +3,10 @@ package model
 import (
 	"context"
 	"fmt"
-	"github.com/Andrewsooter442/MVCAssignment/config"
 	"log"
 	"time"
+
+	"github.com/Andrewsooter442/MVCAssignment/config"
 )
 
 func (model *ModelConnection) CreateCategory(category *config.Category) error {
