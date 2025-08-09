@@ -5,5 +5,4 @@ import (
 )
 
 func (app *Application) HandleRootRequest(w http.ResponseWriter, r *http.Request) {
-
 }

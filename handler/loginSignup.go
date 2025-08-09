@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/Andrewsooter442/MVCAssignment/internal/model"
 	"github.com/golang-jwt/jwt/v5"
@@ -9,6 +10,33 @@ import (
 	"strings"
 	"time"
 )
+
+func validateLoginRequest(req model.LoginRequest) error {
+	if req.Username == "" {
+		return errors.New("username is a required field")
+	}
+	if req.Password == "" {
+		return errors.New("password is a required field")
+	}
+	return nil
+}
+
+func validateSignupRequest(req model.SignupRequest) error {
+	if req.Username == "" {
+		return errors.New("username is a required field")
+	}
+	if len(req.Password) < 6 {
+		return errors.New("password must be at least 6 characters long")
+	}
+	if !strings.Contains(req.Email, "@") || !strings.Contains(req.Email, ".") {
+		return errors.New("invalid email format")
+	}
+	if len(req.Phone) < 10 {
+		return errors.New("phone number seems too short")
+	}
+
+	return nil
+}
 
 func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("HandleLoginRequest")
@@ -24,10 +52,15 @@ func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Reques
 		req.Username = r.FormValue("username")
 		req.Password = r.FormValue("password")
 
+		if err := validateLoginRequest(req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
 		fmt.Println("Login attempt for:", req.Username)
 		token, err := app.Pool.AuthenticateUser(req)
 		if err != nil {
-			http.Error(w, "Failed to create new user", http.StatusBadRequest)
+			http.Error(w, "Failed to login", http.StatusBadRequest)
 			return
 		}
 
@@ -89,15 +122,10 @@ func (app *Application) HandleSignupRequest(w http.ResponseWriter, r *http.Reque
 		req.Phone = r.FormValue("phone")
 		req.Email = r.FormValue("email")
 
-		if len(req.Password) < 6 {
-			http.Error(w, "Password too short", http.StatusBadRequest)
+		if err := validateSignupRequest(req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if !strings.Contains(req.Email, "@") {
-			http.Error(w, "Invalid email format", http.StatusBadRequest)
-			return
-		}
-
 		if err := app.Pool.CreateNewUser(req); err != nil {
 			http.Error(w, "Failed to create new user", http.StatusBadRequest)
 			return

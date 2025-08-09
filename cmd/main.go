@@ -51,7 +51,7 @@ func main() {
 	mux.Handle("/api/", middleware.VerifyJWT(http.HandlerFunc(app.HandleApiRequest)))
 	mux.Handle("/admin/", middleware.VerifyJWT(http.HandlerFunc(app.HandleAdminRequest)))
 
-	if err := http.ListenAndServe(":"+os.Getenv("PORT"), middleware.Logger(mux)); err != nil {
+	if err := http.ListenAndServe(":"+os.Getenv("PORT"), (mux)); err != nil {
 		fmt.Println("Error starting server")
 		log.Fatal(err)
 	}

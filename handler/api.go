@@ -110,11 +110,26 @@ func validatePaymentData(form url.Values) error {
 		return errors.New("invalid format for orderId, must be an integer")
 	}
 
-	_, err := strconv.Atoi(form.Get("total"))
+	total, err := strconv.Atoi(form.Get("total"))
 	if err != nil {
 		return errors.New("invalid format for total, must be an integer")
 	}
+	if total <= 0 {
+		return errors.New("invalid format for total, must be a positive integer")
+	}
 
+	method := form.Get("paymentMethod")
+
+	allowedMethods := map[string]bool{
+		"card":    true,
+		"cod":     true,
+		"bitcoin": true,
+		"monaro":  true,
+	}
+
+	if _, ok := allowedMethods[method]; !ok {
+		return fmt.Errorf("payment method '%s' is not supported", method)
+	}
 	return nil
 }
 
