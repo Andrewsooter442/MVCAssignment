@@ -1,3 +1,7 @@
-UPDATE users SET isAdmin = false WHERE name = 'admin';
-UPDATE users SET isCheff = false WHERE name = 'chef';
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS payment;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS items;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS users;
 
