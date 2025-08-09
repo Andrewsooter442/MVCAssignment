@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/Andrewsooter442/MVCAssignment/config"
 	"log"
 	"time"
 )
 
-func (model *ModelConnection) PlaceOrder(order *Order) (int64, error) {
+func (model *ModelConnection) PlaceOrder(order *config.Order) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -60,7 +61,7 @@ func (model *ModelConnection) PlaceOrder(order *Order) (int64, error) {
 	return orderID, nil
 }
 
-func (model *ModelConnection) CompletePayment(paymentDetails *Payment) error {
+func (model *ModelConnection) CompletePayment(paymentDetails *config.Payment) error {
 	query := `
         INSERT INTO payment (order_id, user_id, total, tip, paid, method)
         VALUES (?, ?, ?, 0, TRUE, ? )

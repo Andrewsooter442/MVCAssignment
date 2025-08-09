@@ -3,11 +3,12 @@ package model
 import (
 	"context"
 	"fmt"
+	"github.com/Andrewsooter442/MVCAssignment/config"
 	"log"
 	"time"
 )
 
-func (model *ModelConnection) CreateCategory(category *Category) error {
+func (model *ModelConnection) CreateCategory(category *config.Category) error {
 	query := `INSERT INTO categories (name) VALUES (?)`
 
 	_, err := model.DB.Exec(query, category.Name)
@@ -19,7 +20,7 @@ func (model *ModelConnection) CreateCategory(category *Category) error {
 	return nil
 }
 
-func (model *ModelConnection) UpdateCategory(category *Category) error {
+func (model *ModelConnection) UpdateCategory(category *config.Category) error {
 	query := `UPDATE categories SET name = ? WHERE id = ?`
 
 	res, err := model.DB.Exec(query, category.Name, category.ID)
@@ -40,7 +41,7 @@ func (model *ModelConnection) UpdateCategory(category *Category) error {
 	return nil
 }
 
-func (model *ModelConnection) CreateItem(item *Item) error {
+func (model *ModelConnection) CreateItem(item *config.Item) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -53,7 +54,7 @@ func (model *ModelConnection) CreateItem(item *Item) error {
 	return nil
 }
 
-func (model *ModelConnection) UpdateItem(item *Item) error {
+func (model *ModelConnection) UpdateItem(item *config.Item) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 

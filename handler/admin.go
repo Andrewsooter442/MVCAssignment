@@ -2,7 +2,7 @@ package handler
 
 import (
 	"errors"
-	"github.com/Andrewsooter442/MVCAssignment/internal/model"
+	"github.com/Andrewsooter442/MVCAssignment/config"
 	"net/http"
 	"strconv"
 )
@@ -27,8 +27,8 @@ func (app *Application) HandleAdminRequest(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func getAdminClaims(r *http.Request) (*model.JWTtoken, error) {
-	claims, ok := r.Context().Value(userObject).(*model.JWTtoken)
+func getAdminClaims(r *http.Request) (*config.JWTtoken, error) {
+	claims, ok := r.Context().Value(userObject).(*config.JWTtoken)
 	if !ok {
 		return nil, errors.New("could not retrieve user claims")
 	}
@@ -55,7 +55,7 @@ func (app *Application) HandleAddCategory(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	category := model.Category{Name: categoryName}
+	category := config.Category{Name: categoryName}
 	err := app.Pool.CreateCategory(&category)
 	if err != nil {
 		http.Error(w, "Failed to create category", http.StatusInternalServerError)
@@ -88,7 +88,7 @@ func (app *Application) HandleEditCategory(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	category := model.Category{ID: categoryID, Name: categoryName}
+	category := config.Category{ID: categoryID, Name: categoryName}
 	if err := app.Pool.UpdateCategory(&category); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -125,7 +125,7 @@ func (app *Application) HandleAddItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item := model.Item{
+	item := config.Item{
 		Name:        r.FormValue("name"),
 		Description: r.FormValue("description"),
 		Price:       price,
@@ -179,7 +179,7 @@ func (app *Application) HandleEditItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item := model.Item{
+	item := config.Item{
 		ID:          itemID,
 		Name:        r.FormValue("name"),
 		Description: r.FormValue("description"),

@@ -3,13 +3,14 @@ package model
 import (
 	"database/sql"
 	"errors"
+	"github.com/Andrewsooter442/MVCAssignment/config"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"time"
 )
 
-func (model *ModelConnection) CreateNewUser(user SignupRequest) error {
+func (model *ModelConnection) CreateNewUser(user config.SignupRequest) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -29,8 +30,8 @@ func (model *ModelConnection) CreateNewUser(user SignupRequest) error {
 	return nil
 }
 
-func (model *ModelConnection) AuthenticateUser(loginData LoginRequest) (*JWTtoken, error) {
-	var token JWTtoken
+func (model *ModelConnection) AuthenticateUser(loginData config.LoginRequest) (*config.JWTtoken, error) {
+	var token config.JWTtoken
 	var storedHash string
 
 	query := `SELECT id, name, isAdmin, isCheff, password_hash FROM users WHERE name = ?`

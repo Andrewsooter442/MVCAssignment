@@ -3,7 +3,7 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"github.com/Andrewsooter442/MVCAssignment/internal/model"
+	"github.com/Andrewsooter442/MVCAssignment/config"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"os"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func validateLoginRequest(req model.LoginRequest) error {
+func validateLoginRequest(req config.LoginRequest) error {
 	if req.Username == "" {
 		return errors.New("username is a required field")
 	}
@@ -21,7 +21,7 @@ func validateLoginRequest(req model.LoginRequest) error {
 	return nil
 }
 
-func validateSignupRequest(req model.SignupRequest) error {
+func validateSignupRequest(req config.SignupRequest) error {
 	if req.Username == "" {
 		return errors.New("username is a required field")
 	}
@@ -48,7 +48,7 @@ func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Reques
 		}
 		//	fmt.Println(r.Form)
 
-		var req model.LoginRequest
+		var req config.LoginRequest
 		req.Username = r.FormValue("username")
 		req.Password = r.FormValue("password")
 
@@ -116,7 +116,7 @@ func (app *Application) HandleSignupRequest(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		var req model.SignupRequest
+		var req config.SignupRequest
 		req.Username = r.FormValue("username")
 		req.Password = r.FormValue("password")
 		req.Phone = r.FormValue("phone")

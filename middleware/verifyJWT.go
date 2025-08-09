@@ -3,14 +3,12 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"github.com/Andrewsooter442/MVCAssignment/config"
 	"net/http"
 	"os"
 
-	"github.com/Andrewsooter442/MVCAssignment/internal/model"
 	"github.com/golang-jwt/jwt/v5"
 )
-
-const userObject = "user"
 
 func VerifyJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +21,7 @@ func VerifyJWT(next http.Handler) http.Handler {
 		}
 
 		tokenString := cookie.Value
-		claims := &model.JWTtoken{}
+		claims := &config.JWTtoken{}
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("JWT_SECRET")), nil
@@ -34,7 +32,7 @@ func VerifyJWT(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userObject, claims)
+		ctx := context.WithValue(r.Context(), config.UserObject, claims)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

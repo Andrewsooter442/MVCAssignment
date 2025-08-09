@@ -4,6 +4,4 @@ MYSQL_PASSWORD = 'god'
 MYSQL_DBNAME = 'kitchen'
 PORT = '3000'
 MYSQL_PORT = '3306'
-JWT_SECRET= 'your-secret-key'
-
-MaxActiveTables = 20
+JWT_SECRET= 'secret-world-knows'

@@ -3,7 +3,7 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"github.com/Andrewsooter442/MVCAssignment/internal/model"
+	"github.com/Andrewsooter442/MVCAssignment/config"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -58,7 +58,7 @@ func (app *Application) HandleCompleteOrderItem(w http.ResponseWriter, r *http.R
 }
 
 func (app *Application) HandlePaymentDone(w http.ResponseWriter, r *http.Request) {
-	claims, ok := r.Context().Value(userObject).(*model.JWTtoken)
+	claims, ok := r.Context().Value(userObject).(*config.JWTtoken)
 	if !ok {
 		http.Error(w, "Could not retrieve user claims", http.StatusInternalServerError)
 		return
@@ -79,7 +79,7 @@ func (app *Application) HandlePaymentDone(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var paymentDetails model.Payment
+	var paymentDetails config.Payment
 	var err error
 
 	paymentDetails.UserID = claims.ID
@@ -134,7 +134,7 @@ func validatePaymentData(form url.Values) error {
 }
 
 func (app *Application) HandlePlaceOrder(w http.ResponseWriter, r *http.Request) {
-	claims, ok := r.Context().Value(userObject).(*model.JWTtoken)
+	claims, ok := r.Context().Value(userObject).(*config.JWTtoken)
 	if !ok {
 		http.Error(w, "Could not retrieve user claims", http.StatusInternalServerError)
 		return
@@ -155,7 +155,7 @@ func (app *Application) HandlePlaceOrder(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var order model.Order
+	var order config.Order
 	var err error
 
 	order.UserID = claims.ID
@@ -170,7 +170,7 @@ func (app *Application) HandlePlaceOrder(w http.ResponseWriter, r *http.Request)
 		itemID, _ := strconv.Atoi(itemIDs[i])
 		quantity, _ := strconv.Atoi(quantities[i])
 
-		order.Items = append(order.Items, model.OrderItem{
+		order.Items = append(order.Items, config.OrderItem{
 			ItemID:      itemID,
 			Quantity:    quantity,
 			Instruction: instructions[i],
