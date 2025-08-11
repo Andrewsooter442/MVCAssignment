@@ -1,0 +1,19 @@
+# General application settings
+app_name: "MVC_Assignment"
+port: 3000
+debug_mode: true
+
+# Database connection settings
+db:
+  host: "localhost"
+  port: 3306
+  user: "kitchen"
+  password: "god"
+  db_name: "kitchen"
+
+
+# A list of enabled features
+feature_flags:
+  - "new_dashboard"
+  - "beta_user_testing"
+  - "api_rate_limiting"

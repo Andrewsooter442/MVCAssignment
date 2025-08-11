@@ -8,8 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
 	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/Andrewsooter442/MVCAssignment/config"
 )
 
 func validateLoginRequest(req config.LoginRequest) error {

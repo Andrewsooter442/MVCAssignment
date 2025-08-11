@@ -2,7 +2,9 @@ package config
 
 import "github.com/golang-jwt/jwt/v5"
 
-const UserObject = "user"
+type contextKey string
+
+const UserObject contextKey = "user"
 
 type JWTtoken struct {
 	ID      int

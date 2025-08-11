@@ -6,9 +6,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/Andrewsooter442/MVCAssignment/config"
 )
 
 func (model *ModelConnection) CreateNewUser(user config.SignupRequest) error {

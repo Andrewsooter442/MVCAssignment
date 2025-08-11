@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) UNIQUE NOT NULL ,
   mail VARCHAR(1024),
@@ -10,7 +10,7 @@ CREATE TABLE users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL 
 );
 
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE orders (
   FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
-CREATE TABLE payment (
+CREATE TABLE IF NOT EXISTS payment (
   order_id INT NOT NULL,
   user_id INT NOT NULL,
   total FLOAT NOT NULL,
@@ -30,12 +30,12 @@ CREATE TABLE payment (
   FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
-CREATE TABLE categories (
+CREATE TABLE IF NOT EXISTS categories (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(200) NOT NULL UNIQUE
 );
 
-CREATE TABLE items (
+CREATE TABLE IF NOT EXISTS items (
   id INT AUTO_INCREMENT PRIMARY KEY,
   category_id INT NOT NULL, 
   name VARCHAR(200) NOT NULL UNIQUE,
@@ -44,7 +44,7 @@ CREATE TABLE items (
   FOREIGN KEY(category_id) REFERENCES categories(id)
 );
 
-CREATE TABLE order_items (
+CREATE TABLE IF NOT EXISTS order_items (
   order_id INT NOT NULL,
   item_id INT NOT NULL,
   PRIMARY KEY(order_id,item_id),

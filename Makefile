@@ -5,7 +5,7 @@ GOLANGCI_LINT := $(GOPATH_BIN)/golangci-lint
 SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GOIMPORTS := $(GOPATH_BIN)/goimports
 GO_PACKAGES = $(shell go list ./... | grep -v vendor)
-PACKAGE_BASE := github.com/sdslabs/nymeria
+PACKAGE_BASE := github.com/Andrewsooter442/MVCAssignment
 
 DB_HOST = $(shell grep -A6 "^db:" config.yaml | grep "host:" | head -1 | cut -d'"' -f2)
 DB_PORT = $(shell grep -A6 "^db:" config.yaml | grep "port:" | head -1 | awk '{print $$2}')
@@ -13,13 +13,13 @@ DB_USER = $(shell grep -A6 "^db:" config.yaml | grep "user:" | head -1 | cut -d'
 DB_PASS = $(shell grep -A6 "^db:" config.yaml | grep "password:" | head -1 | cut -d'"' -f2)
 DB_NAME = $(shell grep -A6 "^db:" config.yaml | grep "db_name:" | head -1 | cut -d'"' -f2)
 
-UP_MIGRATION_FILE = db/migrations/000001_init_schema.up.sql
-DOWN_MIGRATION_FILE = db/migrations/000001_init_schema.down.sql
+UP_MIGRATION_FILE = migrations/000001_init_schema.up.sql
+DOWN_MIGRATION_FILE = migrations/000001_init_schema.down.sql
 
 .PHONY: help vendor build run dev lint format clean
 
 help:
-	@echo "Nymeria make help"
+	@echo "MVCAssignment make help"
 	@echo ""
 	@echo "vendor: Downloads the dependencies in the vendor folder"
 	@echo "build: Builds the binary of the server"
@@ -35,11 +35,11 @@ vendor:
 	@echo "Vendor downloaded successfully"
 
 build:
-	@${GO} build -o nymeria ./cmd/nymeria/main.go
+	@${GO} build -o mvcassignment ./cmd/
 	@echo "Binary built successfully"
 
 run:
-	@./nymeria
+	@./mvcassignment
 
 dev:
 	@$(GOPATH_BIN)/air -c .air.toml
@@ -48,7 +48,7 @@ install-golangci-lint:
 	@echo "=====> Installing golangci-lint..."
 	@curl -sSfL \
 	 	https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
-	 	sh -s -- -b $(GOPATH_BIN) v1.62.2
+	 	sh -s -- -b $(GOPATH_BIN)  v1.64.8
 
 lint: install-golangci-lint
 	@$(GO) vet $(GO_PACKAGES)
@@ -73,7 +73,7 @@ verify-format: install-goimports
 	$(if $(shell $(GOIMPORTS) -l -local ${PACKAGE_BASE} ${SRC}), @echo ERROR: Format verification failed! && $(GOIMPORTS) -l -local ${PACKAGE_BASE} ${SRC} && exit 1)
 
 clean:
-	@rm -f nymeria
+	@rm -f mvcassignment
 	@rm -rf vendor/
 	@echo "Clean successful"
 
@@ -82,15 +82,15 @@ install-air:
 	@curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(GOPATH_BIN)
 	@echo "Air installed successfully"	
 
-apply-migration:
-	@echo "Applying migration..."
-	@echo "DB_HOST: $(DB_HOST)"
-	@echo "DB_PORT: $(DB_PORT)"
-	@echo "DB_USER: $(DB_USER)"
-	@echo "DB_PASS: $(DB_PASS)"
-	@echo "DB_NAME: $(DB_NAME)"
-	PGPASSWORD=$(DB_PASS) psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d $(DB_NAME) -f $(UP_MIGRATION_FILE)
+#apply-migration:
+	#@echo "Applying migration..."
+	#@echo "DB_HOST: $(DB_HOST)"
+	#@echo "DB_PORT: $(DB_PORT)"
+	#@echo "DB_USER: $(DB_USER)"
+	#@echo "DB_PASS: $(DB_PASS)"
+	#@echo "DB_NAME: $(DB_NAME)"
+	#mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < $(UP_MIGRATION_FILE)
 
-rollback-migration:
-	@echo "Rolling back migration..."
-	PGPASSWORD=$(DB_PASS) psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d $(DB_NAME) -f $(DOWN_MIGRATION_FILE)
+ #rollback-migration:
+	#@echo "Rolling back migration..."
+	#mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < $(DOWN_MIGRATION_FILE)

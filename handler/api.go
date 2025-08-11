@@ -55,6 +55,9 @@ func (app *Application) HandleCompleteOrderItem(w http.ResponseWriter, r *http.R
 	}
 
 	err = app.Pool.CompleteOrder(ItemID)
+	if err != nil {
+		http.Error(w, "Invalid itemId", http.StatusBadRequest)
+	}
 
 }
 
