@@ -34,7 +34,6 @@ func createDbConnection() (*handler.Application, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	pool := model.ModelConnection{DB: db}
 	app := &handler.Application{Pool: pool}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/Andrewsooter442/MVCAssignment/config"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +12,9 @@ import (
 )
 
 func main() {
+	// Load the html templates
+	config.LoadTemplates()
+
 	// Set environment variables from the .env file
 	err := godotenv.Load()
 	if err != nil {
@@ -23,14 +27,18 @@ func main() {
 		log.Fatal(err)
 	}
 
+	defer app.Pool.DB.Close()
 	// Creating a Server and listen
-	mux := http.NewServeMux()
+	mainMux := http.NewServeMux()
+
+	// Serve static files
+	ServeStaticFiles(mainMux)
 
 	//Register the routes
-	registerRoutes(mux, app)
+	registerRoutes(mainMux, app)
 
 	//Start listning
-	if err := http.ListenAndServe(":"+os.Getenv("PORT"), (mux)); err != nil {
+	if err := http.ListenAndServe(":"+os.Getenv("PORT"), (mainMux)); err != nil {
 		fmt.Println("Error starting server")
 		log.Fatal(err)
 	}

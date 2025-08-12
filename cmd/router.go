@@ -5,17 +5,26 @@ import (
 
 	"github.com/Andrewsooter442/MVCAssignment/handler"
 	"github.com/Andrewsooter442/MVCAssignment/middleware"
+	"github.com/gorilla/mux"
 )
 
-func registerRoutes(mux *http.ServeMux, app *handler.Application) {
+func registerRoutes(mainMux *http.ServeMux, app *handler.Application) {
 
-	//Can add any middleware before them, that's why using(Handle and HandleFunc)
-	//mux.Handle("/", middleware.VerifyJWTMiddleware(http.HandlerFunc(handler.HandleRootRequest)))
-	// removing jwt verification
-	mux.Handle("/", middleware.VerifyJWT(http.HandlerFunc(app.HandleRootRequest)))
-	mux.Handle("/login", (http.HandlerFunc(app.HandleLoginRequest)))
-	mux.Handle("/signup", (http.HandlerFunc(app.HandleSignupRequest)))
-	mux.Handle("/api/", middleware.VerifyJWT(http.HandlerFunc(app.HandleApiRequest)))
-	mux.Handle("/admin/", middleware.VerifyJWT(http.HandlerFunc(app.HandleAdminRequest)))
+	mainMux.Handle("/", middleware.VerifyJWT(http.HandlerFunc(app.HandleRootRequest)))
+	mainMux.Handle("/login", (http.HandlerFunc(app.HandleLoginRequest)))
+	mainMux.Handle("/signup", (http.HandlerFunc(app.HandleSignupRequest)))
+	mainMux.Handle("/admin/", middleware.VerifyJWT(http.HandlerFunc(app.HandleAdminRequest)))
 
+	apiRouter := mux.NewRouter()
+
+	apiSubrouter := apiRouter.PathPrefix("/api").Subrouter()
+	apiSubrouter.Use(middleware.VerifyJWT) // Apply your JWT middleware here
+
+	apiSubrouter.HandleFunc("/editItem/{id}", app.HandleGetEditItem).Methods("GET")
+	apiSubrouter.HandleFunc("/editItem/{id}", app.HandlePostEditItem).Methods("POST")
+	//apiSubrouter.HandleFunc("/products", app.HandleCreateProduct).Methods("POST")
+	//apiSubrouter.HandleFunc("/products/{sku}", app.HandleUpdateProduct).Methods("PUT")
+	apiSubrouter.HandleFunc("/logout", app.HandleLogout).Methods("GET")
+
+	mainMux.Handle("/api/", apiRouter)
 }
