@@ -13,21 +13,6 @@ body {
   min-height: 100vh;
 }
 
-::-webkit-scrollbar {
-  width: 0.5rem;
-}
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 0.625rem;
-}
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 0.625rem;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-  cursor: pointer;
-}
 
 .main-header {
   background: linear-gradient(to right, #2563eb, #4f46e5);
@@ -469,7 +454,6 @@ body {
   width: 100%;
 }
 
-/* old order Card Styles */
 .order-card {
     background-color: #f9fafb;
     padding: 1.25rem;

@@ -22,27 +22,6 @@ func (model *ModelConnection) CreateCategory(category *config.Category) error {
 	return nil
 }
 
-func (model *ModelConnection) UpdateCategory(category *config.Category) error {
-	query := `UPDATE categories SET name = ? WHERE id = ?`
-
-	res, err := model.DB.Exec(query, category.Name, category.ID)
-	if err != nil {
-		log.Printf("Error executing update for category %d: %v", category.ID, err)
-		return fmt.Errorf("failed to update category: %w", err)
-	}
-
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		log.Printf("Error getting rows affected for category update: %v", err)
-		return fmt.Errorf("failed to verify category update: %w", err)
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("no category found with ID %d to update", category.ID)
-	}
-
-	return nil
-}
-
 func (model *ModelConnection) CreateItem(item *config.Item) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -110,6 +89,7 @@ func (model *ModelConnection) GetAllCategories() ([]config.Category, error) {
 
 	return categories, nil
 }
+
 func (model *ModelConnection) GetAllItems() ([]config.Item, error) {
 	query := `SELECT id, category_id, name, price, description FROM items`
 	rows, err := model.DB.Query(query)

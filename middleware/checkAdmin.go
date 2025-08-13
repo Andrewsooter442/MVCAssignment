@@ -15,6 +15,7 @@ func CheckAdmin(next http.Handler) http.Handler {
 
 		if claims.IsAdmin {
 			next.ServeHTTP(w, r)
+			return
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 

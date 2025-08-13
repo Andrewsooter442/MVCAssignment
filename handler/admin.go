@@ -48,63 +48,6 @@ func (app *Application) HandlePostAddCategory(w http.ResponseWriter, r *http.Req
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (app *Application) HandleGetEditCategory(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Invalid Category ID", http.StatusBadRequest)
-		return
-	}
-
-	category, err := app.Pool.GetCategoryByID(id)
-	if err != nil {
-		log.Printf("Failed to get category %d: %v", id, err)
-		http.Error(w, "Category not found", http.StatusNotFound)
-		return
-	}
-
-	data := config.MenuEditPageData{
-		Title:    "Edit Category",
-		Action:   fmt.Sprintf("/admin/editCategory/%d", id),
-		Type:     "category",
-		Category: *category,
-	}
-
-	if err := config.Templates.ExecuteTemplate(w, "menuEdit.html", data); err != nil {
-		log.Printf("Error executing template: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
-}
-
-func (app *Application) HandlePostEditCategory(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, "Invalid category ID", http.StatusBadRequest)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Failed to parse form", http.StatusBadRequest)
-		return
-	}
-
-	categoryName := r.FormValue("name")
-	if categoryName == "" {
-		http.Error(w, "Category name cannot be empty", http.StatusBadRequest)
-		return
-	}
-
-	category := config.Category{ID: id, Name: categoryName}
-	if err := app.Pool.UpdateCategory(&category); err != nil {
-		log.Printf("Failed to update category %d: %v", id, err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
 // Item Handlers
 func (app *Application) HandleGetAddItem(w http.ResponseWriter, r *http.Request) {
 	categories, err := app.Pool.GetAllCategories()
