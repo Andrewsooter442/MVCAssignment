@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/Andrewsooter442/MVCAssignment/config"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/Andrewsooter442/MVCAssignment/config"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -26,8 +27,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	defer app.Pool.DB.Close()
+
 	// Creating a Server and listen
 	mainMux := http.NewServeMux()
 

@@ -13,7 +13,12 @@ DB_USER = $(shell grep -A6 "^db:" config.yaml | grep "user:" | head -1 | cut -d'
 DB_PASS = $(shell grep -A6 "^db:" config.yaml | grep "password:" | head -1 | cut -d'"' -f2)
 DB_NAME = $(shell grep -A6 "^db:" config.yaml | grep "db_name:" | head -1 | cut -d'"' -f2)
 
-UP_MIGRATION_FILE = migrations/000001_init_schema.up.sql
+DB_INIT_FILE= migrations/000001_create_database.up.sql
+CREATE_TABLES= migrations/000002_create_users_table.up.sql
+CREATE_MENU=migrations/000004_create_users_table.up.sql
+MAKE_ADMIN=migrations/000003_create_users_table.up.sql
+
+
 DOWN_MIGRATION_FILE = migrations/000001_init_schema.down.sql
 
 .PHONY: help vendor build run dev lint format clean
@@ -82,15 +87,22 @@ install-air:
 	@curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(GOPATH_BIN)
 	@echo "Air installed successfully"	
 
-#apply-migration:
-	#@echo "Applying migration..."
-	#@echo "DB_HOST: $(DB_HOST)"
-	#@echo "DB_PORT: $(DB_PORT)"
-	#@echo "DB_USER: $(DB_USER)"
-	#@echo "DB_PASS: $(DB_PASS)"
-	#@echo "DB_NAME: $(DB_NAME)"
-	#mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < $(UP_MIGRATION_FILE)
+apply-migration:
+	@echo "Applying migration..."
+	@echo "DB_HOST: $(DB_HOST)"
+	@echo "DB_PORT: $(DB_PORT)"
+	@echo "DB_USER: $(DB_USER)"
+	@echo "DB_NAME: $(DB_NAME)"
 
- #rollback-migration:
-	#@echo "Rolling back migration..."
-	#mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < $(DOWN_MIGRATION_FILE)
+	mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS)  < $(DB_INIT_FILE)
+	mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < $(CREATE_TABLES)
+	mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < $(CREATE_MENU)
+
+create-admin:
+	@echo "Creating Admin and Chef users..."
+	@echo "DB_HOST: $(DB_HOST)"
+	@echo "DB_PORT: $(DB_PORT)"
+	@echo "DB_USER: $(DB_USER)"
+	@echo "DB_NAME: $(DB_NAME)"
+
+	mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < $(MAKE_ADMIN)

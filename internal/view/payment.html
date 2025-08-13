@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Ordering System - Payment</title>
+    <link rel="stylesheet" href="/static/css/home.css">
+</head>
+<body>
+
+<header class="main-header">
+</header>
+
+<main class="main-container">
+    {{if .Order}}
+    <section class="payment-section cart-section">
+        <h2 class="cart-title">Payment Details</h2>
+
+        <form id="paymentForm" action="/api/payment" method="POST">
+            <div class="cart-summary">
+                <div class="cart-total-row">
+                    <span>Total Bill:</span>
+                    <span id="totalBillDisplay">${{printf "%.2f" .Order.Total}}</span>
+                </div>
+                <br>
+                <br>
+                <div class="form-group instructions-group">
+                    <label for="paymentMethod" class="instructions-label">Payment Method:</label>
+                    <select id="paymentMethod" name="paymentMethod" class="category-filter">
+                        <option value="Monero">Monero</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Debit Card">Debit Card</option>
+                        <option value="Bitcoin">Bitcoin</option>
+                        <option value="Cash">Cash</option>
+                    </select>
+                </div>
+
+                <input type="hidden" id="userId" name="userid" value="{{.Client.ID}}">
+                <input type="hidden" id="orderId" name="orderId" value="{{.Order.OrderID}}">
+                <input type="hidden" name="total" value="{{.Order.Total}}">
+
+                <button type="submit" class="proceed-to-order-btn action-button" id="donePayment">
+                    Pay Now
+                </button>
+            </div>
+        </form>
+    </section>
+    {{else}}
+    <section class="menu-container">
+        <div class="section-header">
+            <h2 class="section-title">You have no pending bills.</h2>
+        </div>
+    </section>
+    {{end}}
+</main>
+</body>
+</html>

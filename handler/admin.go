@@ -1,52 +1,34 @@
 package handler
 
 import (
-	"errors"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 
 	"github.com/Andrewsooter442/MVCAssignment/config"
 )
 
-func (app *Application) HandleAdminRequest(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path[len("/api/"):]
-	switch path {
-	case "addCategory":
-		app.HandleAddCategory(w, r)
-	case "editCategory":
-		app.HandleEditCategory(w, r)
-	case "addItem":
-		app.HandleAddItem(w, r)
-	case "editItem":
-		app.HandleEditItem(w, r)
+// Category Handlers
+func (app *Application) HandleGetAddCategory(w http.ResponseWriter, r *http.Request) {
+	data := config.MenuEditPageData{
+		Title:  "Add New Category",
+		Action: "/admin/addCategory",
+		Type:   "category",
+	}
 
-		//To implement
-	//case "viewOlderOrders":
-
-	default:
-		http.NotFound(w, r)
+	err := config.Templates.ExecuteTemplate(w, "menuEdit.html", data)
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
 
-func getAdminClaims(r *http.Request) (*config.JWTtoken, error) {
-	claims, ok := r.Context().Value(userObject).(*config.JWTtoken)
-	if !ok {
-		return nil, errors.New("could not retrieve user claims")
-	}
-	if !claims.IsAdmin {
-		return nil, errors.New("user does not have admin privileges")
-	}
-	return claims, nil
-}
-
-func (app *Application) HandleAddCategory(w http.ResponseWriter, r *http.Request) {
-	if _, err := getAdminClaims(r); err != nil {
-		http.Error(w, "Forbidden: Admins only", http.StatusForbidden)
-		return
-	}
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+func (app *Application) HandlePostAddCategory(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
 		return
 	}
 
@@ -57,29 +39,53 @@ func (app *Application) HandleAddCategory(w http.ResponseWriter, r *http.Request
 	}
 
 	category := config.Category{Name: categoryName}
-	err := app.Pool.CreateCategory(&category)
-	if err != nil {
-		http.Error(w, "Failed to create category", http.StatusInternalServerError)
+	if err := app.Pool.CreateCategory(&category); err != nil {
+		log.Printf("Failed to create category: %v", err)
+		http.Error(w, "Failed to create category. It might already exist.", http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (app *Application) HandleEditCategory(w http.ResponseWriter, r *http.Request) {
-	if _, err := getAdminClaims(r); err != nil {
-		http.Error(w, "Forbidden: Admins only", http.StatusForbidden)
+func (app *Application) HandleGetEditCategory(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid Category ID", http.StatusBadRequest)
 		return
 	}
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	category, err := app.Pool.GetCategoryByID(id)
+	if err != nil {
+		log.Printf("Failed to get category %d: %v", id, err)
+		http.Error(w, "Category not found", http.StatusNotFound)
 		return
 	}
 
-	categoryID, err := strconv.Atoi(r.FormValue("id"))
+	data := config.MenuEditPageData{
+		Title:    "Edit Category",
+		Action:   fmt.Sprintf("/admin/editCategory/%d", id),
+		Type:     "category",
+		Category: *category,
+	}
+
+	if err := config.Templates.ExecuteTemplate(w, "menuEdit.html", data); err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func (app *Application) HandlePostEditCategory(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Invalid category ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
 		return
 	}
 
@@ -89,26 +95,39 @@ func (app *Application) HandleEditCategory(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	category := config.Category{ID: categoryID, Name: categoryName}
+	category := config.Category{ID: id, Name: categoryName}
 	if err := app.Pool.UpdateCategory(&category); err != nil {
+		log.Printf("Failed to update category %d: %v", id, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (app *Application) HandleAddItem(w http.ResponseWriter, r *http.Request) {
-	if _, err := getAdminClaims(r); err != nil {
-		http.Error(w, "Forbidden: Admins only", http.StatusForbidden)
+// Item Handlers
+func (app *Application) HandleGetAddItem(w http.ResponseWriter, r *http.Request) {
+	categories, err := app.Pool.GetAllCategories()
+	if err != nil {
+		log.Printf("Failed to get all categories: %v", err)
+		http.Error(w, "Failed to load data for form", http.StatusInternalServerError)
 		return
 	}
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
+	data := config.MenuEditPageData{
+		Title:      "Add New Item",
+		Action:     "/admin/addItem",
+		Type:       "item",
+		Categories: categories,
 	}
 
+	if err := config.Templates.ExecuteTemplate(w, "menuEdit.html", data); err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func (app *Application) HandlePostAddItem(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Failed to parse form", http.StatusBadRequest)
 		return
@@ -120,9 +139,9 @@ func (app *Application) HandleAddItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	categoryID, err := strconv.Atoi(r.FormValue("categoryId"))
+	categoryID, err := strconv.Atoi(r.FormValue("category_id"))
 	if err != nil {
-		http.Error(w, "Invalid categoryId format", http.StatusBadRequest)
+		http.Error(w, "Invalid category selected", http.StatusBadRequest)
 		return
 	}
 
@@ -138,33 +157,61 @@ func (app *Application) HandleAddItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = app.Pool.CreateItem(&item)
-	if err != nil {
+	if err := app.Pool.CreateItem(&item); err != nil {
+		log.Printf("Failed to create item: %v", err)
 		http.Error(w, "Failed to create item", http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (app *Application) HandleEditItem(w http.ResponseWriter, r *http.Request) {
-	if _, err := getAdminClaims(r); err != nil {
-		http.Error(w, "Forbidden: Admins only", http.StatusForbidden)
+func (app *Application) HandleGetEditItem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid Item ID", http.StatusBadRequest)
 		return
 	}
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	item, err := app.Pool.GetItemByID(id)
+	if err != nil {
+		log.Printf("Failed to get item %d: %v", id, err)
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
+	}
+
+	categories, err := app.Pool.GetAllCategories()
+	if err != nil {
+		log.Printf("Failed to get all categories: %v", err)
+		http.Error(w, "Failed to load data for form", http.StatusInternalServerError)
+		return
+	}
+
+	data := config.MenuEditPageData{
+		Title:      "Edit Item",
+		Action:     fmt.Sprintf("/admin/editItem/%d", id),
+		Type:       "item",
+		Item:       *item,
+		Categories: categories,
+	}
+
+	if err := config.Templates.ExecuteTemplate(w, "menuEdit.html", data); err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func (app *Application) HandlePostEditItem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	itemID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid Item ID", http.StatusBadRequest)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Failed to parse form", http.StatusBadRequest)
-		return
-	}
-
-	itemID, err := strconv.Atoi(r.FormValue("id"))
-	if err != nil {
-		http.Error(w, "Invalid item ID", http.StatusBadRequest)
 		return
 	}
 
@@ -174,9 +221,9 @@ func (app *Application) HandleEditItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	categoryID, err := strconv.Atoi(r.FormValue("categoryId"))
+	categoryID, err := strconv.Atoi(r.FormValue("category_id"))
 	if err != nil {
-		http.Error(w, "Invalid categoryId format", http.StatusBadRequest)
+		http.Error(w, "Invalid category selected", http.StatusBadRequest)
 		return
 	}
 
@@ -194,9 +241,28 @@ func (app *Application) HandleEditItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := app.Pool.UpdateItem(&item); err != nil {
+		log.Printf("Failed to update item %d: %v", itemID, err)
 		http.Error(w, "Failed to update item", http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+func (app *Application) HandleGetViewOldOrder(w http.ResponseWriter, r *http.Request) {
+	orders, err := app.Pool.GetAllOrders()
+	if err != nil {
+		log.Printf("Failed to retrieve all orders: %v", err)
+		http.Error(w, "Could not load order history.", http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]interface{}{
+		"Orders": orders,
+	}
+
+	err = config.Templates.ExecuteTemplate(w, "viewOldOrders.html", data)
+	if err != nil {
+		log.Printf("Error executing order history template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }

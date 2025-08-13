@@ -39,6 +39,8 @@ func (model *ModelConnection) AuthenticateUser(loginData config.LoginRequest) (*
 	query := `SELECT id, name, isAdmin, isCheff, password_hash FROM users WHERE name = ?`
 
 	row := model.DB.QueryRow(query, loginData.Username)
+	//fmt.Println("coming from model/user.go")
+	//fmt.Println(row)
 
 	err := row.Scan(&token.ID, &token.Name, &token.IsAdmin, &token.IsCheff, &storedHash)
 	if err != nil {

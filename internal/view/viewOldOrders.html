@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Food Ordering System - Order History</title>
+   <link rel="stylesheet" href="/static/css/home.css">
+</head>
+<body>
+
+<header class="main-header">
+   <div class="header-content">
+      <h1 class="welcome-title">Order History</h1>
+      <a href="/" class="header-back-link">Back to Dashboard</a>
+   </div>
+</header>
+
+<main class="main-container">
+   <section class="menu-container">
+      <div class="section-header">
+         <h2 class="section-title"> ............................................  All Past Orders ..............................................</h2>
+      </div>
+
+      <div class="menu-list">
+         {{if .Orders}}
+         <div class="item-grid">
+            {{range .Orders}}
+            <div class="order-card">
+               <div class="order-header">
+                  Order #{{.ID}}
+               </div>
+               <div class="order-details">
+                  <p><strong>User ID:</strong> {{.UserID}}</p>
+                  <p><strong>Table No:</strong> {{.TableNumber}}</p>
+                  <p>
+                     <strong>Date:</strong>
+                     {{.CreatedAt.Format "January 2, 2006, 03:04 PM"}}
+                  </p>
+                  <p>
+                     <strong>Status:</strong>
+                     {{if .Complete}}
+                     <span class="status-completed">Completed</span>
+                     {{else}}
+                     <span class="status-pending">Pending</span>
+                     {{end}}
+                  </p>
+               </div>
+            </div>
+            {{end}}
+         </div>
+         {{else}}
+         <div class="no-items-message">
+            <h3>No past orders were found.</h3>
+         </div>
+         {{end}}
+      </div>
+   </section>
+</main>
+
+</body>
+</html>

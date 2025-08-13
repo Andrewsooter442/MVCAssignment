@@ -5,194 +5,167 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Ordering System - Menu</title>
     <link rel="stylesheet" href="/static/css/home.css">
-    <script src="/js/home.js" defer></script>
+    <script src="/static/js/home.js" defer></script>
 </head>
 <body>
-    <header class="main-header">
-        <div class="header-content">
-            <h1 class="welcome-title">Welcome, {{ .Client.Name }}!</h1>
-            <div class="user-info">
-                {{ if not .Client.IsAdmin }}
-                    <p>Table No: <span class="highlight-text">{{ .Client.TableNo }}</span></p>
-                {{ end }}
+<header class="main-header">
+    <div class="header-content">
+        <h1 class="welcome-title">Welcome, {{ .Client.Name }}!</h1>
+        <div class="user-info">
+            {{ if not .Client.IsAdmin }}
+            <p>Table No: <span class="highlight-text">{{ .Client.TableNo }}</span></p>
+            {{ end }}
+            {{ if .Client.IsAdmin }}
+            <p class="admin-tag">Admin Portal</p>
+            {{ end }}
+            <button onclick="window.location.href='/api/logout'">
+                Logout
+            </button>
+        </div>
+    </div>
+</header>
+<main class="main-container">
+    <section class="menu-container">
+        <div class="section-header">
+            <h2 class="section-title">Our Menu</h2>
+            <div class="filter-controls">
+                <label for="categoryFilter" class="filter-label">Filter by Category:</label>
+                <select id="categoryFilter" class="category-filter">
+                    <option value="all">All Categories</option>
+                    {{ range .Menu.Categories }}
+                    <option value="{{ .Name }}">{{ .Name }}</option>
+                    {{ end }}
+                </select>
                 {{ if .Client.IsAdmin }}
-                    <p class="admin-tag">Admin Portal</p>
-                {{ end }}
-                <button onclick="window.location.href='/api/logout'">
-                    Logout
+                <button onclick="window.location.href='/admin/addCategory'" class="admin-button add-category-btn">
+                    Add New Category
                 </button>
+                <button onclick="window.location.href='/admin/addItem'" class="admin-button add-category-btn">
+                    Add New Item
+                </button>
+                {{ end }}
             </div>
         </div>
-    </header>
-    <main class="main-container">
-        {{/* ----- NO CHANGES IN THIS SECTION ----- */}}
-        <section class="menu-container">
-            <div class="section-header">
-                <h2 class="section-title">Our Menu</h2>
-                <div class="filter-controls">
-                    <label for="categoryFilter" class="filter-label">Filter by Category:</label>
-                    <select id="categoryFilter" class="category-filter">
-                        <option value="all">All Categories</option>
-                        {{ range .Menu.Categories }}
-                            <option value="{{ .Name }}">{{ .Name }}</option>
-                        {{ end }}
-                    </select>
-                    {{ if .Client.IsAdmin }}
-                        <button onclick="window.location.href='/admin/addCategory'" class="admin-button add-category-btn">
-                            Add New Category
-                        </button>
-                        <button onclick="window.location.href='/admin/addItem'" class="admin-button add-category-btn">
-                            Add New Item
-                        </button>
+        <div id="menuContainer" class="menu-list">
+            {{ range $category := .Menu.Categories }}
+            <div class="category-section" data-category="{{ $category.Name }}">
+                <div class="category-header">
+                    <h3 class="category-title">{{ $category.Name }}</h3>
+                    {{ if $.Client.IsAdmin }}
+
+                    {{ end }}
+                </div>
+                <div class="item-grid">
+                    {{ range $item := $.Menu.Items }}
+                    {{ if eq $item.CategoryID $category.ID }}
+                    <div class="item-card">
+                        <div class="item-details">
+                            <h4 class="item-name">{{ $item.Name }}</h4>
+                            <p class="item-description">{{ $item.Description }}</p>
+                            <p class="item-price">${{ printf "%.2f" $item.Price }}</p>
+                        </div>
+                        <div class="item-actions">
+                            <div class="quantity-control">
+                                <label for="quantity-{{ $item.ID }}" class="quantity-label">Quantity:</label>
+                                <input type="number" id="quantity-{{ $item.ID }}" value="1" min="1" class="quantity-input">
+                            </div>
+                            <div class="instructions-group">
+                                <label for="instructions-{{ $item.ID }}" class="instructions-label">Instructions (optional):</label>
+                                <textarea id="instructions-{{ $item.ID }}" rows="2" class="instructions-input" placeholder="e.g., No onions, extra spicy"></textarea>
+                            </div>
+                            {{ if not $.Client.IsAdmin }}
+                            <button
+                                    class="add-to-cart-btn action-button"
+                                    data-item-id="{{ $item.ID }}"
+                                    data-item-name="{{ $item.Name }}"
+                                    data-item-price="{{ $item.Price }}"
+                            >
+                                Add to Cart
+                            </button>
+                            {{ end }}
+                            {{ if $.Client.IsAdmin }}
+                            <button onclick="window.location.href='/admin/editItem/{{ $item.ID }}'" class="admin-button edit-item-btn">
+                                Edit Item
+                            </button>
+                            {{ end }}
+                        </div>
+                    </div>
+                    {{ end }}
                     {{ end }}
                 </div>
             </div>
-           <div id="menuContainer" class="menu-list">
-                {{ range $category := .Menu.Categories }}
-                    <div class="category-section" data-category="{{ $category.Name }}">
-                        <div class="category-header">
-                            <h3 class="category-title">{{ $category.Name }}</h3>
-                            {{ if $.Client.IsAdmin }}
-                                <button onclick="window.location.href='/admin/editCategory/{{ $category.ID }}'" class="admin-link-button edit-category-btn">
-                                    Edit Category
-                                </button>
-                            {{ end }}
-                        </div>
-                        <div class="item-grid">
-                            {{ range $item := $.Menu.Items }}
-                                {{ if eq $item.CategoryID $category.ID }}
-                                    <div class="item-card">
-                                        <div class="item-details">
-                                            <h4 class="item-name">{{ $item.Name }}</h4>
-                                            <p class="item-description">{{ $item.Description }}</p>
-                                            <p class="item-price">${{ printf "%.2f" $item.Price }}</p>
-                                        </div>
-                                        <div class="item-actions">
-                                            <div class="quantity-control">
-                                                <label for="quantity-{{ $item.ID }}" class="quantity-label">Quantity:</label>
-                                                <input type="number" id="quantity-{{ $item.ID }}" value="1" min="1" class="quantity-input">
-                                            </div>
-                                            <div class="instructions-group">
-                                                <label for="instructions-{{ $item.ID }}" class="instructions-label">Instructions (optional):</label>
-                                                <textarea id="instructions-{{ $item.ID }}" rows="2" class="instructions-input" placeholder="e.g., No onions, extra spicy"></textarea>
-                                            </div>
-                                            {{ if not $.Client.IsAdmin }}
-                                            <button
-                                                class="add-to-cart-btn action-button"
-                                                data-item-id="{{ $item.ID }}"
-                                                data-item-name="{{ $item.Name }}"
-                                                data-item-price="{{ $item.Price }}"
-                                            >
-                                                Add to Cart
-                                            </button>
-                                            {{ end }}
-                                            {{ if $.Client.IsAdmin }}
-                                                <button onclick="window.location.href='/api/editItem/{{ $item.ID }}'" class="admin-button edit-item-btn">
-                                                    Edit Item
-                                                </button>
-                                            {{ end }}
-                                        </div>
-                                    </div>
-                                {{ end }}
-                            {{ end }}
-                        </div>
-                    </div>
-                {{ end }}
+            {{ end }}
+        </div>
+    </section>
+
+    {{ if not ($.Client.IsAdmin)  }}
+    <form id="orderForm" action="/api/placeOrder" method="POST">
+        <section class="cart-section">
+            <h2 class="cart-title">Your Cart</h2>
+            <div id="cartItems" class="cart-items-list">
+                <p id="emptyCartMessage" class="empty-cart-message">Your cart is empty.</p>
             </div>
-        </section>
+            <div class="cart-summary">
 
-        {{/* ----- NO CHANGES IN THIS SECTION ----- */}}
-        <form id="orderForm" action="/api/placeOrder" method="POST">
-            <section class="cart-section">
-                <h2 class="cart-title">Your Cart</h2>
-                <div id="cartItems" class="cart-items-list">
-                    <p id="emptyCartMessage" class="empty-cart-message">Your cart is empty.</p>
-                </div>
-                <div class="cart-summary">
-                    <input type="hidden" id="cartData" name="orderData">
-                    <div class="cart-total-row">
-                        <span>Total:</span>
-                        <span id="cartTotal">$0.00</span>
-                    </div>
-                    <button type="submit" id="proceedToOrderBtn" class="proceed-to-order-btn action-button" disabled>
-                        Proceed to Order
-                    </button>
-                </div>
-            </section>
-        </form>
+                {{ if not .Client.IsAdmin }}
+                <input type="hidden" name="tableNumber" value="{{ .Client.TableNo }}">
+                {{ end }}
 
-        {{/* ----- CHANGES ARE IN THIS SECTION ----- */}}
-        {{ if .Client.IsAdmin }}
-        <section class="menu-container">
-            <div class="section-header">
-                <h2 class="section-title">Customers Orders Pending...</h2>
-                <button onclick="window.location.href='/admin/viewOldOrders'" class="admin-button add-category-btn">
-                    View Old Orders
+                <div class="cart-total-row">
+                    <span>Total:</span>
+                    <span id="cartTotal">$0.00</span>
+                </div>
+                <button type="submit" id="proceedToOrderBtn" class="proceed-to-order-btn action-button" disabled>
+                    Proceed to Order
                 </button>
             </div>
-            <div class="menu-list">
-                {{ if gt (len .PendingOrders) 0 }}
-                    {{ range $order := .PendingOrders }}
-                        {{/* CHANGE 1: Use the correct field name 'ID' from the 'Order' struct */}}
-                        <div class="category-section" data-order-id="{{ $order.ID }}">
-                            <div class="category-header">
-                                <h3 class="category-title">Order #{{ $order.ID }}</h3>
-                            </div>
-                            <div class="item-grid">
-                                {{ range $orderItem := $order.Items }}
-                                    <div class="item-card chef-item-card">
-                                        <div class="item-details">
-                                            <p class="item-quantity">Quantity: {{ $orderItem.Quantity }}</p>
-
-                                            {{/* CHANGE 2: Look up the item name by looping through the main menu items */}}
-                                            {{ range $menuItem := $.Menu.Items }}
-                                                {{ if eq $menuItem.ID $orderItem.ItemID }}
-                                                    <h4 class="item-name">{{ $menuItem.Name }}</h4>
-                                                {{ end }}
-                                            {{ end }}
-
-                                            {{ if $orderItem.Instruction }}
-                                                <p class="item-instructions">
-                                                    <strong>Instructions:</strong> {{ $orderItem.Instruction }}
-                                                </p>
-                                            {{ end }}
-                                        </div>
-                                        <div class="item-actions">
-                                            <button
-                                                class="action-button complete-item-btn"
-                                                onclick="
-                                                    fetch('/api/completeOrder',{
-                                                                method: 'POST',
-                                                                headers: {
-                                                                'Content-Type': 'application/json'
-                                                                },
-                                                                body: JSON.stringify({
-                                                                    {{/* CHANGE 3: Use the correct field 'ID' here too */}}
-                                                                    orderId: '{{ $order.ID }}',
-                                                                    itemId: '{{ $orderItem.ItemID }}'
-                                                                }),
-                                                            })
-                                                            .then(response => { if(response.ok) { location.href='/'; } })
-                                                            .catch(error => {
-                                                                console.error('Error completing item:', error);
-                                                            });
-                                                ">
-                                                Mark as Done
-                                            </button>
-                                        </div>
-                                    </div>
-                                {{ end }}
-                            </div>
-                        </div>
-                    {{ end }}
-                {{ else }}
-                    <div class="no-items-message">
-                        <h3>All orders are complete.</h3>
-                    </div>
-                {{ end }}
-            </div>
         </section>
-        {{ end }}
-    </main>
+    </form>
+    {{ end }}
+    {{ if .Client.IsAdmin }}
+    <section class="menu-container">
+        <div class="section-header">
+            <h2 class="section-title">Customers Orders Pending...</h2>
+            <button onclick="window.location.href='/admin/viewOldOrders'" class="admin-button add-category-btn">
+                View Old Orders
+            </button>
+        </div>
+        <div class="menu-list">
+            {{ if gt (len .PendingOrders) 0 }}
+            {{ range $order := .PendingOrders }}
+            <div class="category-section" data-order-id="{{ $order.ID }}">
+                <div class="category-header">
+                    <h3 class="category-title">Order #{{ $order.ID }}</h3>
+                </div>
+                <div class="item-grid">
+                    {{ range $orderItem := $order.Items }}
+                    <div class="item-card chef-item-card">
+                        <div class="item-details">
+                            <p class="item-quantity">Quantity: {{ $orderItem.Quantity }}</p>
+                            {{ range $menuItem := $.Menu.Items }}
+                            {{ if eq $menuItem.ID $orderItem.ItemID }}
+                            <h4 class="item-name">{{ $menuItem.Name }}</h4>
+                            {{ end }}
+                            {{ end }}
+                            {{ if $orderItem.Instruction }}
+                            <p class="item-instructions">
+                                <strong>Instructions:</strong> {{ $orderItem.Instruction }}
+                            </p>
+                            {{ end }}
+                        </div>
+                    </div>
+                    {{ end }}
+                </div>
+            </div>
+            {{ end }}
+            {{ else }}
+            <div class="no-items-message">
+                <h3>All orders are complete.</h3>
+            </div>
+            {{ end }}
+        </div>
+    </section>
+    {{ end }}
+</main>
 </body>
 </html>

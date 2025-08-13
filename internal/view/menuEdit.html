@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }} - Admin Portal</title>
+    <link rel="stylesheet" href="/static/css/editMenu.css">
+</head>
+<body>
+
+<main class="form-container">
+    <h1>{{ .Title }}</h1>
+
+    {{if .Error}}
+    <p class="error-message">{{.Error}}</p>
+    {{end}}
+
+    <form action="{{ .Action }}" method="POST">
+
+        {{ if eq .Type "category" }}
+        <div class="form-group">
+            <label for="name">Category Name:</label>
+            <input type="text" id="name" name="name" value="{{ .Category.Name }}" placeholder="eg. Appetizers" required>
+        </div>
+
+        {{ else if eq .Type "item" }}
+        <div class="form-group">
+            <label for="name">Item Name:</label>
+            <input type="text" id="name" name="name" value="{{ .Item.Name }}" placeholder="eg. Calamari" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" placeholder="Describe the item" required>{{ .Item.Description }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="price">Price ($):</label>
+            <input type="number" id="price" name="price" step="0.01" value="{{ printf "%.2f" .Item.Price }}" placeholder="eg. 12.99" required>
+        </div>
+
+        <div class="form-group">
+            <label for="category_id">Category:</label>
+            <select id="category_id" name="category_id" required>
+                <option value="" disabled {{ if not .Item.CategoryID }}selected{{ end }}>Select a Category</option>
+                {{ range .Categories }}
+                <option value="{{ .ID }}" {{ if eq .ID $.Item.CategoryID }}selected{{ end }}>
+                    {{ .Name }}
+                </option>
+                {{ end }}
+            </select>
+        </div>
+        {{ end }}
+
+        <div class="form-actions">
+            <button type="submit" class="btn-save">Save Changes</button>
+            <a href="/" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+
+    {{ if eq .Type "item" }}
+    <hr>
+    <div class="add-category-link">
+        <a href="/admin/addCategory" class="btn-add-category">Add New Category</a>
+    </div>
+    {{ end }}
+</main>
+
+</body>
+</html>

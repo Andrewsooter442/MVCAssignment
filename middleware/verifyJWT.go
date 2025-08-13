@@ -15,11 +15,12 @@ func VerifyJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		cookie, err := r.Cookie("token")
-		fmt.Println(cookie, err.Error())
 		if err != nil {
+			fmt.Println("Cookie error:", err)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
+		//fmt.Println("Cookie found:", cookie)
 
 		tokenString := cookie.Value
 		claims := &config.JWTtoken{}
@@ -28,12 +29,14 @@ func VerifyJWT(next http.Handler) http.Handler {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
+		//fmt.Println("claims:", claims)
+
+		ctx := context.WithValue(r.Context(), config.UserObject, claims)
+
 		if err != nil || !token.Valid {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-
-		ctx := context.WithValue(r.Context(), config.UserObject, claims)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

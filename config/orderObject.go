@@ -11,10 +11,10 @@ type Order struct {
 	Items       []OrderItem `json:"items"`
 }
 
-// OrderItem represents a single item within an order.
 type OrderItem struct {
 	OrderID     int    `json:"orderId,omitempty"`
 	ItemID      int    `json:"itemId"`
+	Name        string `json:"name"`
 	Quantity    int    `json:"quantity"`
 	Instruction string `json:"instruction"`
 }

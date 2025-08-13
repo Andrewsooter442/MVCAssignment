@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -20,7 +21,6 @@ func (model *ModelConnection) PlaceOrder(order *config.Order) (int64, error) {
 	}
 	defer tx.Rollback()
 
-	// Step 1: Insert the main order record.
 	orderQuery := `
         INSERT INTO orders (user_id, table_no, complete, created_at)
         VALUES (?, ?, ?, UTC_TIMESTAMP())
@@ -73,7 +73,6 @@ func (model *ModelConnection) CompletePayment(paymentDetails *config.Payment) er
 		return errors.New("failed to create user in database")
 	}
 
-	//fmt.Println("User created successfully")
 	return nil
 
 }
@@ -104,4 +103,86 @@ func (model *ModelConnection) CompleteOrder(orderID int) error {
 	}
 
 	return tx.Commit()
+}
+func (model *ModelConnection) CompleteOrderItem(orderID int, itemID int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `UPDATE order_items SET complete = TRUE WHERE order_id = ? AND item_id = ?`
+	res, err := model.DB.ExecContext(ctx, query, orderID, itemID)
+	if err != nil {
+		log.Printf("Error updating order item completion status: %v", err)
+		return fmt.Errorf("could not update item status")
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("could not verify update")
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("no matching item found in order to complete")
+	}
+
+	return nil
+}
+
+func (model *ModelConnection) CheckOrderItemByOrderID(id int) bool {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM order_items WHERE order_id = ? AND complete = ? LIMIT 1)`
+
+	err := model.DB.QueryRow(query, id, false).Scan(&exists)
+	if err != nil {
+		fmt.Println("Error checking order item:", err)
+		return false
+	}
+
+	return exists
+}
+
+func (model *ModelConnection) GetUserIDForOrder(orderID int) (int, error) {
+	var userID int
+	query := `SELECT user_id FROM orders WHERE id = ?`
+	err := model.DB.QueryRow(query, orderID).Scan(&userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, fmt.Errorf("no order found with ID %d", orderID)
+		}
+		return 0, err
+	}
+	return userID, nil
+}
+
+func (model *ModelConnection) GetLatestUnpaidOrderForUser(userID int) (*config.PaymentPageOrder, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+        SELECT
+            o.id,
+            SUM(i.price * oi.quantity) AS total_amount
+        FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        JOIN items i ON oi.item_id = i.id
+        LEFT JOIN payment p ON o.id = p.order_id
+        WHERE
+            o.user_id = ? AND p.order_id IS NULL
+        GROUP BY
+            o.id, o.created_at
+        ORDER BY
+            o.created_at DESC
+        LIMIT 1;
+    `
+
+	var paymentOrder config.PaymentPageOrder
+
+	err := model.DB.QueryRowContext(ctx, query, userID).Scan(&paymentOrder.OrderID, &paymentOrder.Total)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		log.Printf("Error finding latest unpaid order for user %d: %v", userID, err)
+		return nil, fmt.Errorf("could not retrieve latest order: %w", err)
+	}
+
+	return &paymentOrder, nil
 }
