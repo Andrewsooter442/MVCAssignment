@@ -20,7 +20,6 @@ func VerifyJWT(next http.Handler) http.Handler {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-		//fmt.Println("Cookie found:", cookie)
 
 		tokenString := cookie.Value
 		claims := &config.JWTtoken{}
@@ -28,8 +27,6 @@ func VerifyJWT(next http.Handler) http.Handler {
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
-
-		//fmt.Println("claims:", claims)
 
 		ctx := context.WithValue(r.Context(), config.UserObject, claims)
 

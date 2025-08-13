@@ -104,6 +104,7 @@ func (model *ModelConnection) CompleteOrder(orderID int) error {
 
 	return tx.Commit()
 }
+
 func (model *ModelConnection) CompleteOrderItem(orderID int, itemID int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

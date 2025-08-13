@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const proceedToOrderBtn = document.getElementById('proceedToOrderBtn');
     const categoryFilter = document.getElementById('categoryFilter');
 
-    // Category filter logic (no changes here)
     categoryFilter.addEventListener('change', (event) => {
         const selectedCategory = event.target.value;
         document.querySelectorAll('.category-section').forEach(section => {
@@ -33,26 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Find an existing item in the cart just by its ID.
             const existingItem = cart.find(item => item.id === itemId);
 
             if (existingItem) {
-                // If the item already exists in the cart...
-                existingItem.quantity += quantity;          // ...add to its quantity.
-                existingItem.instructions = instructions;   // ...and overwrite with the latest instructions.
+                existingItem.quantity += quantity;
+                existingItem.instructions = instructions;
             } else {
-                // Otherwise, add it as a new item to the cart.
                 cart.push({ id: itemId, name: itemName, price: itemPrice, quantity: quantity, instructions: instructions });
             }
 
-            // Update the display and reset the input fields for a better user experience.
             updateCartDisplay();
             quantityInput.value = 1;
             instructionsInput.value = '';
         });
     });
 
-    // Cart display and remove logic (no changes here)
     function updateCartDisplay() {
         cartItemsContainer.innerHTML = '';
         let total = 0;
@@ -89,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Form submission logic (no changes here)
     const orderForm = document.getElementById('orderForm');
     orderForm.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -116,6 +109,5 @@ document.addEventListener('DOMContentLoaded', () => {
         orderForm.submit();
     });
 
-    // Initial call to set up the cart view
     updateCartDisplay();
 });
