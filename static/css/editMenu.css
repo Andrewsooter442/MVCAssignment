@@ -81,7 +81,8 @@ h1 {
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  text-decoration: none;
+  background-color: #f59e0b;
+  color: white;  text-decoration: none;
   text-align: center;
   transition: background-color 0.2s ease;
 }
