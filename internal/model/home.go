@@ -49,7 +49,7 @@ func (model *ModelConnection) GetOrderById(orderID int) (config.Order, error) {
 	return order, nil
 }
 
-func (model *ModelConnection) GetIncompleteOrdersForChef() ([]config.Order, error) {
+func (model *ModelConnection) GetIncompleteOrders() ([]config.Order, error) {
 	ordersQuery := `SELECT id, user_id, table_no, created_at FROM orders WHERE complete = FALSE ORDER BY created_at ASC`
 	rows, err := model.DB.Query(ordersQuery)
 	if err != nil {

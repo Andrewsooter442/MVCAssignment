@@ -26,7 +26,7 @@ func (app *Application) HandleRootRequest(w http.ResponseWriter, r *http.Request
 		TableNo: 5,
 	}
 	if client.IsChef {
-		orders, err := app.Pool.GetIncompleteOrdersForChef()
+		orders, err := app.Pool.GetIncompleteOrders()
 		if err != nil {
 			http.Error(w, "Failed to load active orders", http.StatusInternalServerError)
 			return
