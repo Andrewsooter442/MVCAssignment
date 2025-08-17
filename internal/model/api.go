@@ -153,37 +153,28 @@ func (model *ModelConnection) GetUserIDForOrder(orderID int) (int, error) {
 	return userID, nil
 }
 
-func (model *ModelConnection) GetLatestUnpaidOrderForUser(userID int) (*config.PaymentPageOrder, error) {
+func (model *ModelConnection) GetLatestUnpaidOrderForUser(userID int) (*config.Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	var latestOrderID int
 	query := `
-        SELECT
-            o.id,
-            SUM(i.price * oi.quantity) AS total_amount
+        SELECT o.id
         FROM orders o
-        JOIN order_items oi ON o.id = oi.order_id
-        JOIN items i ON oi.item_id = i.id
         LEFT JOIN payment p ON o.id = p.order_id
-        WHERE
-            o.user_id = ? AND p.order_id IS NULL
-        GROUP BY
-            o.id, o.created_at
-        ORDER BY
-            o.created_at DESC
+        WHERE o.user_id = ? AND p.order_id IS NULL
+        ORDER BY o.created_at DESC
         LIMIT 1;
     `
 
-	var paymentOrder config.PaymentPageOrder
-
-	err := model.DB.QueryRowContext(ctx, query, userID).Scan(&paymentOrder.OrderID, &paymentOrder.Total)
+	err := model.DB.QueryRowContext(ctx, query, userID).Scan(&latestOrderID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		log.Printf("Error finding latest unpaid order for user %d: %v", userID, err)
-		return nil, fmt.Errorf("could not retrieve latest order: %w", err)
+		log.Printf("Error finding latest unpaid order ID for user %d: %v", userID, err)
+		return nil, fmt.Errorf("could not retrieve latest order ID: %w", err)
 	}
 
-	return &paymentOrder, nil
+	return model.GetOrderById(latestOrderID)
 }

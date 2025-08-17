@@ -50,7 +50,7 @@
                             <button
                                     class="action-button complete-item-btn"
                                     onclick="markItemComplete({{.OrderID}}, {{.ItemID}})">
-                                Mark as Done
+                                Item Prepared
                             </button>
                         </div>
                     </div>
@@ -69,6 +69,11 @@
 
 <script>
     function markItemComplete(orderId, itemId) {
+        const confirmAction = confirm("Are you sure you want to mark this item as done?");
+        if (!confirmAction) {
+            return; // stop if user cancels
+        }
+
         fetch('/api/completeOrder', {
             method: 'POST',
             headers: {
@@ -91,6 +96,7 @@
             });
     }
 </script>
+
 
 </body>
 </html>

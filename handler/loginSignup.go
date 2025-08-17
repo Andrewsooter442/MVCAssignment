@@ -78,7 +78,6 @@ func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Reques
 		fmt.Println("Login attempt for:", req.Username)
 
 		// Create a JWT token
-		fmt.Println("Querying the db for ", req.Username)
 		token, err := app.Pool.AuthenticateUser(req)
 		if err != nil {
 			data.InvalidCred = true

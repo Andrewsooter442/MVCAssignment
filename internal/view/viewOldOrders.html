@@ -25,28 +25,31 @@
          {{if .Orders}}
          <div class="item-grid">
             {{range .Orders}}
-            <div class="order-card">
-               <div class="order-header">
-                  Order #{{.ID}}
+            <a href="/admin/vieworder/{{.ID}}" class="order-card-link">
+               <div class="order-card">
+                  <div class="order-header">
+                     Order #{{.ID}}
+                  </div>
+                  <div class="order-details">
+                     <p><strong>User ID:</strong> {{.UserID}}</p>
+                     <p><strong>Table No:</strong> {{.TableNumber}}</p>
+                     <p>
+                        <strong>Date:</strong>
+                        {{.CreatedAt.Format "January 2, 2006, 03:04 PM"}}
+                     </p>
+                     <p>
+                        <strong>Status:</strong>
+                        {{if .Complete}}
+                        <span class="status-completed">Completed</span>
+                        {{else}}
+                        <span class="status-pending">Pending</span>
+                        {{end}}
+                     </p>
+                  </div>
                </div>
-               <div class="order-details">
-                  <p><strong>User ID:</strong> {{.UserID}}</p>
-                  <p><strong>Table No:</strong> {{.TableNumber}}</p>
-                  <p>
-                     <strong>Date:</strong>
-                     {{.CreatedAt.Format "January 2, 2006, 03:04 PM"}}
-                  </p>
-                  <p>
-                     <strong>Status:</strong>
-                     {{if .Complete}}
-                     <span class="status-completed">Completed</span>
-                     {{else}}
-                     <span class="status-pending">Pending</span>
-                     {{end}}
-                  </p>
-               </div>
-            </div>
+            </a>
             {{end}}
+
          </div>
          {{else}}
          <div class="no-items-message">

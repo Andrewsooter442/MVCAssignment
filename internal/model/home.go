@@ -6,7 +6,19 @@ import (
 	"log"
 )
 
-func (model *ModelConnection) GetOrderById(orderID int) (config.Order, error) {
+func (model *ModelConnection) GetItemPrice(itemId int) (float64, error) {
+	var price float64
+	query := `SELECT price FROM items WHERE id = ?`
+	err := model.DB.QueryRow(query, itemId).Scan(&price)
+	if err != nil {
+		log.Printf("Failed to get item price for item %d: %v", itemId, err)
+		return 0, err
+	}
+	return price, nil
+}
+
+func (model *ModelConnection) GetOrderById(orderID int) (*config.Order, error) {
+
 	var order config.Order
 
 	orderQuery := `SELECT id, user_id, table_no, complete, created_at FROM orders WHERE id = ?`
@@ -14,17 +26,22 @@ func (model *ModelConnection) GetOrderById(orderID int) (config.Order, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("No order found with ID: %d", orderID)
-			return config.Order{}, err
+			return nil, err
 		}
 		log.Printf("Error querying for order %d: %v", orderID, err)
-		return config.Order{}, err
+		return nil, err
 	}
 
-	itemsQuery := `SELECT item_id, quantity, instruction FROM order_items WHERE order_id = ?`
+	itemsQuery := `
+		SELECT oi.item_id, i.name, oi.quantity, oi.instruction
+		FROM order_items oi
+		JOIN items i ON oi.item_id = i.id
+		WHERE oi.order_id = ?
+	`
 	rows, err := model.DB.Query(itemsQuery, orderID)
 	if err != nil {
 		log.Printf("Error querying order items for order %d: %v", orderID, err)
-		return config.Order{}, err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -32,21 +49,22 @@ func (model *ModelConnection) GetOrderById(orderID int) (config.Order, error) {
 	for rows.Next() {
 		var item config.OrderItem
 		item.OrderID = orderID
-		if err := rows.Scan(&item.ItemID, &item.Quantity, &item.Instruction); err != nil {
+		if err := rows.Scan(&item.ItemID, &item.Name, &item.Quantity, &item.Instruction); err != nil {
 			log.Printf("Error scanning order item: %v", err)
-			return config.Order{}, err
+			return nil, err
 		}
+		item.Price, err = model.GetItemPrice(item.ItemID)
 		orderItems = append(orderItems, item)
 	}
 
 	if err = rows.Err(); err != nil {
 		log.Printf("Rows iteration error on order items: %v", err)
-		return config.Order{}, err
+		return nil, err
 	}
 
 	order.Items = orderItems
 
-	return order, nil
+	return &order, nil
 }
 
 func (model *ModelConnection) GetIncompleteOrders() ([]config.Order, error) {

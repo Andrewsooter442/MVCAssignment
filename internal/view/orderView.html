@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order #{{ .Order.ID }} Details</title>
+    <link rel="stylesheet" href="/static/css/home.css">
+</head>
+<body>
+
+<header class="main-header">
+    <div class="header-content">
+        <h1 class="welcome-title">Order Details</h1>
+        <a href="/admin/viewOldOrders" class="header-back-link ">Back to Order History</a>
+    </div>
+</header>
+
+<main class="main-container">
+    <section class="menu-container">
+        {{if .Order}}
+        <div class="order-summary-card">
+            <div class="order-summary-header">
+                <h2>Order Summary #{{.Order.ID}}</h2>
+            </div>
+            <div class="order-meta-info">
+                <p><strong>User:</strong> {{.UserName}}</p>
+                <p><strong>Table No:</strong> {{.Order.TableNumber}}</p>
+                <p><strong>Date:</strong> {{.Order.CreatedAt.Format "January 2, 2006, 03:04 PM"}}</p>
+                <p><strong>Status:</strong>
+                    {{if .Order.Complete}}
+                    <span class="status-completed" style="color: green; font-weight: bold;">Completed</span>
+                    {{else}}
+                    <span class="status-pending" style="color: orange; font-weight: bold;">Pending</span>
+                    {{end}}
+                </p>
+            </div>
+
+            <table class="order-items-table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Unit Price</th>
+                    <th>Quantity</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .Order.Items}}
+                <tr>
+                    <td>
+                        <strong>{{.Name}}</strong>
+                        {{if .Instruction}}
+                        <span class="instructions-text">Instructions: {{.Instruction}}</span>
+                        {{end}}
+                    </td>
+                    <td>${{printf "%.2f" .Price}}</td>
+                    <td>{{.Quantity}}</td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+            <div class="cart-summary" style="margin-top: 20px;">
+                <div class="cart-total-row" style="font-size: 1.5rem; text-align: right;">
+                    <span>Grand Total:</span>
+                    <span>${{printf "%.2f" .Total}}</span>
+                </div>
+            </div>
+        </div>
+        {{else}}
+        <div class="no-items-message">
+            <h3>Could not load order details.</h3>
+        </div>
+        {{end}}
+    </section>
+</main>
+
+</body>
+</html>

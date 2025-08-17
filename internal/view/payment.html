@@ -7,20 +7,40 @@
     <link rel="stylesheet" href="/static/css/home.css">
 </head>
 <body>
-
 <header class="main-header">
+    <div class="header-content">
+        <h1 class="welcome-title">Finalize Your Payment</h1>
+    </div>
 </header>
-
 <main class="main-container">
     {{if .Order}}
     <section class="payment-section cart-section">
+
+        <div class="order-details-summary">
+            <h3>Your Order Summary (Order #{{.Order.ID}})</h3>
+            <p><strong>Hi, {{.Client.Name}}!</strong> Please confirm your order items below.</p>
+            <ul class="order-item-list">
+                {{range .Order.Items}}
+                <li>
+                    <div>
+                        <span class="item-info">{{.Quantity}}x {{.Name}}</span>
+                        {{if .Instruction}}
+                        <span class="item-instructions">Instructions: {{.Instruction}}</span>
+                        {{end}}
+                    </div>
+                    <span>${{printf "%.2f" .Price}} each</span>
+                </li>
+                {{end}}
+            </ul>
+        </div>
+
         <h2 class="cart-title">Payment Details</h2>
 
         <form id="paymentForm" action="/api/payment" method="POST">
             <div class="cart-summary">
                 <div class="cart-total-row">
                     <span>Total Bill:</span>
-                    <span id="totalBillDisplay">${{printf "%.2f" .Order.Total}}</span>
+                    <span id="totalBillDisplay">${{printf "%.2f" .Total}}</span>
                 </div>
                 <br>
                 <br>
@@ -35,9 +55,8 @@
                     </select>
                 </div>
 
-                <input type="hidden" id="userId" name="userid" value="{{.Client.ID}}">
-                <input type="hidden" id="orderId" name="orderId" value="{{.Order.OrderID}}">
-                <input type="hidden" name="total" value="{{.Order.Total}}">
+                <input type="hidden" name="orderId" value="{{.Order.ID}}">
+                <input type="hidden" name="total" value="{{.Total}}">
 
                 <button type="submit" class="proceed-to-order-btn action-button" id="donePayment">
                     Pay Now
@@ -49,6 +68,7 @@
     <section class="menu-container">
         <div class="section-header">
             <h2 class="section-title">You have no pending bills.</h2>
+            <a href="/" class="admin-button" style="margin-top: 20px;">Back to Menu</a>
         </div>
     </section>
     {{end}}

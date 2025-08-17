@@ -12,9 +12,16 @@ type Order struct {
 }
 
 type OrderItem struct {
-	OrderID     int    `json:"orderId,omitempty"`
-	ItemID      int    `json:"itemId"`
-	Name        string `json:"name"`
-	Quantity    int    `json:"quantity"`
-	Instruction string `json:"instruction"`
+	OrderID     int     `json:"orderId,omitempty"`
+	ItemID      int     `json:"itemId"`
+	Name        string  `json:"name"`
+	Quantity    int     `json:"quantity"`
+	Instruction string  `json:"instruction"`
+	Price       float64 `json:"price"`
+}
+
+type ViewOrderPageData struct {
+	Order    *Order
+	UserName string
+	Total    float64
 }

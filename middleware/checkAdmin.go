@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/Andrewsooter442/MVCAssignment/config"
 	"net/http"
 )
@@ -17,6 +18,7 @@ func CheckAdmin(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
+		fmt.Println("redirecting")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 
 	})

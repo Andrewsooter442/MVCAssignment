@@ -10,15 +10,21 @@
 <body>
 <header class="main-header">
     <div class="header-content">
+        <div>
         <h1 class="welcome-title">Welcome, {{ .Client.Name }}!</h1>
+        {{ if not .Client.IsAdmin }}
+        <p>Table No: <span class="highlight-text">{{ .Client.TableNo }}</span></p>
+        {{ end }}
+        </div>
+
         <div class="user-info">
             {{ if not .Client.IsAdmin }}
-            <p>Table No: <span class="highlight-text">{{ .Client.TableNo }}</span></p>
+            <a href="/viewOlderOrders" class="logout-button">Your Previous Orders</a>
             {{ end }}
             {{ if .Client.IsAdmin }}
             <p class="admin-tag">Admin Portal</p>
             {{ end }}
-            <button onclick="window.location.href='/api/logout'" class="admin-button add-category-btn">
+            <button onclick="window.location.href='/api/logout'" class=" logout-button">
                 Logout
             </button>
         </div>
@@ -65,15 +71,19 @@
                             <p class="item-price">${{ printf "%.2f" $item.Price }}</p>
                         </div>
                         <div class="item-actions">
+                            {{ if not $.Client.IsAdmin }}
                             <div class="quantity-control">
                                 <label for="quantity-{{ $item.ID }}" class="quantity-label">Quantity:</label>
-                                <input type="number" id="quantity-{{ $item.ID }}" value="1" min="1" class="quantity-input">
+                                <div class="quantity-stepper">
+                                    <input type="number" id="quantity-{{ $item.ID }}" value="1" min="1" class="quantity-input" readonly>
+                                    <button type="button" class="quantity-btn quantity-minus" aria-label="Decrease quantity" data-item-id="{{ $item.ID }}">-</button>
+                                    <button type="button" class="quantity-btn quantity-plus" aria-label="Increase quantity" data-item-id="{{ $item.ID }}">+</button>
+                                </div>
                             </div>
                             <div class="instructions-group">
                                 <label for="instructions-{{ $item.ID }}" class="instructions-label">Instructions (optional):</label>
                                 <textarea id="instructions-{{ $item.ID }}" rows="2" class="instructions-input" placeholder="e.g., No onions, extra spicy"></textarea>
                             </div>
-                            {{ if not $.Client.IsAdmin }}
                             <button
                                     class="add-to-cart-btn action-button"
                                     data-item-id="{{ $item.ID }}"
@@ -122,11 +132,12 @@
         </section>
     </form>
     {{ end }}
+    </div>
     {{ if .Client.IsAdmin }}
     <section class="menu-container">
         <div class="section-header">
             <h2 class="section-title">Customers Orders Pending...</h2>
-            <button onclick="window.location.href='/admin/viewOldOrders'" class="admin-button add-category-btn">
+            <button onclick="window.location.href='/admin/viewOldOrders'" class="admin-button logout-button">
                 View Old Orders
             </button>
         </div>

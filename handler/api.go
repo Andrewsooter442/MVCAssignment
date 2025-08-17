@@ -156,16 +156,24 @@ func (app *Application) HandleGetPayment(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	orderData, err := app.Pool.GetLatestUnpaidOrderForUser(claims.ID)
+	order, err := app.Pool.GetLatestUnpaidOrderForUser(claims.ID)
 	if err != nil {
 		log.Printf("Database error in HandleGetPayment: %v", err)
 		http.Error(w, "Could not retrieve order details", http.StatusInternalServerError)
 		return
 	}
 
+	var total float64
+	if order != nil {
+		for _, item := range order.Items {
+			total += item.Price * float64(item.Quantity)
+		}
+	}
+
 	pageData := config.PaymentPageData{
 		Client: claims,
-		Order:  orderData,
+		Order:  order,
+		Total:  total,
 	}
 
 	err = config.Templates.ExecuteTemplate(w, "payment.html", pageData)
@@ -174,6 +182,7 @@ func (app *Application) HandleGetPayment(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "Failed to render the payment page.", http.StatusInternalServerError)
 	}
 }
+
 func (app *Application) HandlePostPayment(w http.ResponseWriter, r *http.Request) {
 	claims, ok := r.Context().Value(config.UserObject).(*config.JWTtoken)
 	if !ok {

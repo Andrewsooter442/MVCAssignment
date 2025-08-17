@@ -59,3 +59,15 @@ func (model *ModelConnection) AuthenticateUser(loginData config.LoginRequest) (*
 
 	return &token, nil
 }
+
+func (model *ModelConnection) GetUserNameById(id int) string {
+	query := `SELECT name FROM users WHERE id = ?`
+	row := model.DB.QueryRow(query, id)
+	var name string
+	err := row.Scan(&name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+		}
+	}
+	return name
+}

@@ -191,6 +191,42 @@ func (app *Application) HandlePostEditItem(w http.ResponseWriter, r *http.Reques
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
+func (app *Application) HandleGetViewOrder(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid Order ID", http.StatusBadRequest)
+		return
+	}
+
+	order, err := app.Pool.GetOrderById(id)
+	if err != nil {
+		log.Printf("Failed to get order %d: %v", id, err)
+		http.Error(w, "Order not found", http.StatusNotFound)
+		return
+	}
+
+	userName := app.Pool.GetUserNameById(order.UserID)
+
+	var total float64
+	for _, item := range order.Items {
+		total += item.Price * float64(item.Quantity)
+	}
+
+	data := config.ViewOrderPageData{
+		Order:    order,
+		UserName: userName,
+		Total:    total,
+	}
+
+	err = config.Templates.ExecuteTemplate(w, "orderView.html", data)
+	if err != nil {
+		log.Printf("Error executing order view template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
 func (app *Application) HandleGetViewOldOrder(w http.ResponseWriter, r *http.Request) {
 	orders, err := app.Pool.GetAllOrders()
 	if err != nil {

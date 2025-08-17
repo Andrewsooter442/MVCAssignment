@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/Andrewsooter442/MVCAssignment/handler"
 	"github.com/Andrewsooter442/MVCAssignment/internal/model"
@@ -15,6 +17,13 @@ func openDB(dsn string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	maxConnections, err := strconv.Atoi(os.Getenv("MAX_OPEN_CONNECTIONS"))
+	if err != nil {
+		return nil, err
+	}
+	db.SetMaxOpenConns(maxConnections)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxLifetime(time.Minute * 5)
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}

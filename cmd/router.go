@@ -28,6 +28,7 @@ func registerRoutes(mainMux *http.ServeMux, app *handler.Application) {
 	adminSubrouter.HandleFunc("/addCategory", app.HandleGetAddCategory).Methods("GET")
 	adminSubrouter.HandleFunc("/addCategory", app.HandlePostAddCategory).Methods("POST")
 	adminSubrouter.HandleFunc("/viewOldOrders", app.HandleGetViewOldOrder).Methods("GET")
+	adminSubrouter.HandleFunc("/vieworder/{id}", app.HandleGetViewOrder).Methods("GET")
 
 	mainMux.Handle("/admin/", adminRouter)
 
