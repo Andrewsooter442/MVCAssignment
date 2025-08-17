@@ -29,7 +29,6 @@ func openDB(dsn string) (*sql.DB, error) {
 	}
 	return db, nil
 }
-
 func createDbConnection() (*handler.Application, error) {
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",

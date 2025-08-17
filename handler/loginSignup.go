@@ -117,7 +117,6 @@ func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Reques
 
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
-
 	case "GET":
 
 		err := config.Templates.ExecuteTemplate(w, "login.html", data)
