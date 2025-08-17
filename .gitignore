@@ -4,3 +4,4 @@ vendor/*
 mvcassignment
 .idea/*
 jwt/*
+db-data/*

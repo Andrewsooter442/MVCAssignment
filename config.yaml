@@ -5,14 +5,14 @@ debug_mode: true
 
 # Database connection settings
 db:
-  host: "127.0.0.1"
+  host: "db"
   port: 3306
   user: "kitchen"
   password: "god"
   db_name: "kitchen"
 
 
-# A list of enabled features
+# A list o enabled features
 feature_flags:
   - "new_dashboard"
   - "beta_user_testing"

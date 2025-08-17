@@ -18,9 +18,9 @@
         </div>
 
         <div class="user-info">
-            {{ if not .Client.IsAdmin }}
+          <!--  {{ if not .Client.IsAdmin }}
             <a href="/viewOlderOrders" class="logout-button">Your Previous Orders</a>
-            {{ end }}
+            {{ end }}-->
             {{ if .Client.IsAdmin }}
             <p class="admin-tag">Admin Portal</p>
             {{ end }}
