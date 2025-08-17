@@ -1,0 +1,10 @@
+
+CREATE TABLE IF NOT EXISTS items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  category_id INT NOT NULL, 
+  name VARCHAR(200) NOT NULL UNIQUE,
+  price FLOAT NOT NULL,
+  description VARCHAR(2000) NOT NULL,
+  FOREIGN KEY(category_id) REFERENCES categories(id)
+);
+

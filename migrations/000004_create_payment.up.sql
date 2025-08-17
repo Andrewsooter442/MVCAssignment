@@ -1,0 +1,12 @@
+
+CREATE TABLE IF NOT EXISTS payment (
+  order_id INT NOT NULL,
+  user_id INT NOT NULL,
+  total FLOAT NOT NULL,
+  tip FLOAT DEFAULT 0 NOT NULL,
+  paid BOOL DEFAULT FALSE NOT NULL,
+  method VARCHAR(200) NOT NULL,
+  FOREIGN KEY(order_id) REFERENCES orders(id),
+  FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
