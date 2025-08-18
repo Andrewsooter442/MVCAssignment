@@ -20,7 +20,7 @@ COPY config.yaml .
 COPY internal/view ./internal/view
 COPY static ./static
 COPY migrations ./migrations
-COPY .env ./.env
+COPY .sampleenv ./.env
 
 
 
