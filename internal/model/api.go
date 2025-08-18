@@ -8,10 +8,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 )
 
-func (model *ModelConnection) PlaceOrder(order *config.Order) (int64, error) {
+func (model *ModelConnection) PlaceOrder(order *types.Order) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -62,7 +62,7 @@ func (model *ModelConnection) PlaceOrder(order *config.Order) (int64, error) {
 	return orderID, nil
 }
 
-func (model *ModelConnection) CompletePayment(paymentDetails *config.Payment) error {
+func (model *ModelConnection) CompletePayment(paymentDetails *types.Payment) error {
 	query := `
         INSERT INTO payment (order_id, user_id, total, tip, paid, method)
         VALUES (?, ?, ?, 0, TRUE, ? )
@@ -153,7 +153,7 @@ func (model *ModelConnection) GetUserIDForOrder(orderID int) (int, error) {
 	return userID, nil
 }
 
-func (model *ModelConnection) GetLatestUnpaidOrderForUser(userID int) (*config.Order, error) {
+func (model *ModelConnection) GetLatestUnpaidOrderForUser(userID int) (*types.Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

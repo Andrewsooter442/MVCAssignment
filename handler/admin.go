@@ -8,18 +8,18 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 )
 
 // Category Handlers
 func (app *Application) HandleGetAddCategory(w http.ResponseWriter, r *http.Request) {
-	data := config.MenuEditPageData{
+	data := types.MenuEditPageData{
 		Title:  "Add New Category",
 		Action: "/admin/addCategory",
 		Type:   "category",
 	}
 
-	err := config.Templates.ExecuteTemplate(w, "menuEdit.html", data)
+	err := types.Templates.ExecuteTemplate(w, "menuEdit.html", data)
 	if err != nil {
 		log.Printf("Error executing template: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -38,7 +38,7 @@ func (app *Application) HandlePostAddCategory(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	category := config.Category{Name: categoryName}
+	category := types.Category{Name: categoryName}
 	if err := app.Pool.CreateCategory(&category); err != nil {
 		log.Printf("Failed to create category: %v", err)
 		http.Error(w, "Failed to create category. It might already exist.", http.StatusInternalServerError)
@@ -57,14 +57,14 @@ func (app *Application) HandleGetAddItem(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	data := config.MenuEditPageData{
+	data := types.MenuEditPageData{
 		Title:      "Add New Item",
 		Action:     "/admin/addItem",
 		Type:       "item",
 		Categories: categories,
 	}
 
-	if err := config.Templates.ExecuteTemplate(w, "menuEdit.html", data); err != nil {
+	if err := types.Templates.ExecuteTemplate(w, "menuEdit.html", data); err != nil {
 		log.Printf("Error executing template: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
@@ -88,7 +88,7 @@ func (app *Application) HandlePostAddItem(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	item := config.Item{
+	item := types.Item{
 		Name:        r.FormValue("name"),
 		Description: r.FormValue("description"),
 		Price:       price,
@@ -131,7 +131,7 @@ func (app *Application) HandleGetEditItem(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	data := config.MenuEditPageData{
+	data := types.MenuEditPageData{
 		Title:      "Edit Item",
 		Action:     fmt.Sprintf("/admin/editItem/%d", id),
 		Type:       "item",
@@ -139,7 +139,7 @@ func (app *Application) HandleGetEditItem(w http.ResponseWriter, r *http.Request
 		Categories: categories,
 	}
 
-	if err := config.Templates.ExecuteTemplate(w, "menuEdit.html", data); err != nil {
+	if err := types.Templates.ExecuteTemplate(w, "menuEdit.html", data); err != nil {
 		log.Printf("Error executing template: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
@@ -170,7 +170,7 @@ func (app *Application) HandlePostEditItem(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	item := config.Item{
+	item := types.Item{
 		ID:          itemID,
 		Name:        r.FormValue("name"),
 		Description: r.FormValue("description"),
@@ -214,13 +214,13 @@ func (app *Application) HandleGetViewOrder(w http.ResponseWriter, r *http.Reques
 		total += item.Price * float64(item.Quantity)
 	}
 
-	data := config.ViewOrderPageData{
+	data := types.ViewOrderPageData{
 		Order:    order,
 		UserName: userName,
 		Total:    total,
 	}
 
-	err = config.Templates.ExecuteTemplate(w, "orderView.html", data)
+	err = types.Templates.ExecuteTemplate(w, "orderView.html", data)
 	if err != nil {
 		log.Printf("Error executing order view template: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -239,7 +239,7 @@ func (app *Application) HandleGetViewOldOrder(w http.ResponseWriter, r *http.Req
 		"Orders": orders,
 	}
 
-	err = config.Templates.ExecuteTemplate(w, "viewOldOrders.html", data)
+	err = types.Templates.ExecuteTemplate(w, "viewOldOrders.html", data)
 	if err != nil {
 		log.Printf("Error executing order history template: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

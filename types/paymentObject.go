@@ -1,4 +1,4 @@
-package config
+package types
 
 type Payment struct {
 	PaymentMethod string  `json:"paymentMethod"`

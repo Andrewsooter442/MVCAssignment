@@ -1,4 +1,4 @@
-package config
+package types
 
 type SignupRequest struct {
 	Username string `json:"username"`

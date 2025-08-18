@@ -9,10 +9,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 )
 
-func (model *ModelConnection) CreateNewUser(user config.SignupRequest) error {
+func (model *ModelConnection) CreateNewUser(user types.SignupRequest) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -31,8 +31,8 @@ func (model *ModelConnection) CreateNewUser(user config.SignupRequest) error {
 	return nil
 }
 
-func (model *ModelConnection) AuthenticateUser(loginData config.LoginRequest) (*config.JWTtoken, error) {
-	var token config.JWTtoken
+func (model *ModelConnection) AuthenticateUser(loginData types.LoginRequest) (*types.JWTtoken, error) {
+	var token types.JWTtoken
 	var storedHash string
 
 	query := `SELECT id, name, isAdmin, isCheff, password_hash FROM users WHERE name = ?`

@@ -33,6 +33,8 @@ func registerRoutes(mainMux *http.ServeMux, app *handler.Application) {
 	mainMux.Handle("/admin/", adminRouter)
 
 	// Api routes
+
+	// For users
 	apiRouter := mux.NewRouter()
 	apiSubrouter := apiRouter.PathPrefix("/api").Subrouter()
 	apiSubrouter.Use(middleware.VerifyJWT)
@@ -41,6 +43,8 @@ func registerRoutes(mainMux *http.ServeMux, app *handler.Application) {
 	apiSubrouter.HandleFunc("/placeOrder", app.HandlePlaceOrder).Methods("POST")
 	apiSubrouter.HandleFunc("/payment", app.HandleGetPayment).Methods("Get")
 	apiSubrouter.HandleFunc("/payment", app.HandlePostPayment).Methods("POST")
+
+	// For chef
 	apiSubrouter.HandleFunc("/completeOrder", app.HandleCompleteOrderItem).Methods("POST")
 
 	mainMux.Handle("/api/", apiRouter)

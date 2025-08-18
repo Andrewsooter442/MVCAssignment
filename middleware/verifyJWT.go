@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -22,13 +22,13 @@ func VerifyJWT(next http.Handler) http.Handler {
 		}
 
 		tokenString := cookie.Value
-		claims := &config.JWTtoken{}
+		claims := &types.JWTtoken{}
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
-		ctx := context.WithValue(r.Context(), config.UserObject, claims)
+		ctx := context.WithValue(r.Context(), types.UserObject, claims)
 
 		if err != nil || !token.Valid {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)

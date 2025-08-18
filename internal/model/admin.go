@@ -7,10 +7,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 )
 
-func (model *ModelConnection) CreateCategory(category *config.Category) error {
+func (model *ModelConnection) CreateCategory(category *types.Category) error {
 	query := `INSERT INTO categories (name) VALUES (?)`
 
 	_, err := model.DB.Exec(query, category.Name)
@@ -22,7 +22,7 @@ func (model *ModelConnection) CreateCategory(category *config.Category) error {
 	return nil
 }
 
-func (model *ModelConnection) CreateItem(item *config.Item) error {
+func (model *ModelConnection) CreateItem(item *types.Item) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -35,7 +35,7 @@ func (model *ModelConnection) CreateItem(item *config.Item) error {
 	return nil
 }
 
-func (model *ModelConnection) UpdateItem(item *config.Item) error {
+func (model *ModelConnection) UpdateItem(item *types.Item) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -49,9 +49,9 @@ func (model *ModelConnection) UpdateItem(item *config.Item) error {
 	return nil
 }
 
-func (model *ModelConnection) GetCategoryByID(id int) (*config.Category, error) {
+func (model *ModelConnection) GetCategoryByID(id int) (*types.Category, error) {
 	query := `SELECT id, name FROM categories WHERE id = ?`
-	var category config.Category
+	var category types.Category
 	err := model.DB.QueryRow(query, id).Scan(&category.ID, &category.Name)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -63,7 +63,7 @@ func (model *ModelConnection) GetCategoryByID(id int) (*config.Category, error) 
 	return &category, nil
 }
 
-func (model *ModelConnection) GetAllCategories() ([]config.Category, error) {
+func (model *ModelConnection) GetAllCategories() ([]types.Category, error) {
 	query := `SELECT id, name FROM categories ORDER BY name ASC`
 	rows, err := model.DB.Query(query)
 	if err != nil {
@@ -72,9 +72,9 @@ func (model *ModelConnection) GetAllCategories() ([]config.Category, error) {
 	}
 	defer rows.Close()
 
-	var categories []config.Category
+	var categories []types.Category
 	for rows.Next() {
-		var category config.Category
+		var category types.Category
 		if err := rows.Scan(&category.ID, &category.Name); err != nil {
 			log.Printf("Error scanning a category: %v", err)
 			return nil, fmt.Errorf("failed to scan category: %w", err)
@@ -90,7 +90,7 @@ func (model *ModelConnection) GetAllCategories() ([]config.Category, error) {
 	return categories, nil
 }
 
-func (model *ModelConnection) GetAllItems() ([]config.Item, error) {
+func (model *ModelConnection) GetAllItems() ([]types.Item, error) {
 	query := `SELECT id, category_id, name, price, description FROM items`
 	rows, err := model.DB.Query(query)
 	if err != nil {
@@ -99,9 +99,9 @@ func (model *ModelConnection) GetAllItems() ([]config.Item, error) {
 	}
 	defer rows.Close()
 
-	var items []config.Item
+	var items []types.Item
 	for rows.Next() {
-		var item config.Item
+		var item types.Item
 		if err := rows.Scan(&item.ID, &item.CategoryID, &item.Name, &item.Price, &item.Description); err != nil {
 			log.Printf("Error scanning item: %v", err)
 			return nil, err
@@ -117,9 +117,9 @@ func (model *ModelConnection) GetAllItems() ([]config.Item, error) {
 	return items, nil
 }
 
-func (model *ModelConnection) GetItemByID(id int) (*config.Item, error) {
+func (model *ModelConnection) GetItemByID(id int) (*types.Item, error) {
 	query := `SELECT id, category_id, name, price, description FROM items WHERE id = ?`
-	var item config.Item
+	var item types.Item
 	err := model.DB.QueryRow(query, id).Scan(&item.ID, &item.CategoryID, &item.Name, &item.Price, &item.Description)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -131,7 +131,7 @@ func (model *ModelConnection) GetItemByID(id int) (*config.Item, error) {
 	return &item, nil
 }
 
-func (model *ModelConnection) GetAllOrders() ([]config.Order, error) {
+func (model *ModelConnection) GetAllOrders() ([]types.Order, error) {
 	orderQuery := `SELECT id, user_id, table_no, complete, created_at FROM orders ORDER BY created_at DESC`
 	orderRows, err := model.DB.Query(orderQuery)
 	if err != nil {
@@ -140,16 +140,16 @@ func (model *ModelConnection) GetAllOrders() ([]config.Order, error) {
 	}
 	defer orderRows.Close()
 
-	ordersMap := make(map[int]*config.Order)
-	var ordersList []*config.Order
+	ordersMap := make(map[int]*types.Order)
+	var ordersList []*types.Order
 
 	for orderRows.Next() {
-		var o config.Order
+		var o types.Order
 		if err := orderRows.Scan(&o.ID, &o.UserID, &o.TableNumber, &o.Complete, &o.CreatedAt); err != nil {
 			log.Printf("Error scanning an order: %v", err)
 			return nil, fmt.Errorf("failed to scan order: %w", err)
 		}
-		o.Items = []config.OrderItem{}
+		o.Items = []types.OrderItem{}
 		ordersMap[o.ID] = &o
 		ordersList = append(ordersList, &o)
 	}
@@ -158,7 +158,7 @@ func (model *ModelConnection) GetAllOrders() ([]config.Order, error) {
 	}
 
 	if len(ordersMap) == 0 {
-		return []config.Order{}, nil
+		return []types.Order{}, nil
 	}
 
 	itemQuery := `SELECT order_id, item_id, quantity, instruction FROM order_items`
@@ -170,7 +170,7 @@ func (model *ModelConnection) GetAllOrders() ([]config.Order, error) {
 	defer itemRows.Close()
 
 	for itemRows.Next() {
-		var oi config.OrderItem
+		var oi types.OrderItem
 		if err := itemRows.Scan(&oi.OrderID, &oi.ItemID, &oi.Quantity, &oi.Instruction); err != nil {
 			log.Printf("Error scanning an order item: %v", err)
 			return nil, fmt.Errorf("failed to scan order item: %w", err)
@@ -184,7 +184,7 @@ func (model *ModelConnection) GetAllOrders() ([]config.Order, error) {
 		return nil, fmt.Errorf("error iterating order item rows: %w", err)
 	}
 
-	finalOrders := make([]config.Order, len(ordersList))
+	finalOrders := make([]types.Order, len(ordersList))
 	for i, orderPtr := range ordersList {
 		finalOrders[i] = *orderPtr
 	}

@@ -1,4 +1,4 @@
-package config
+package types
 
 type MenuEditPageData struct {
 	Title      string

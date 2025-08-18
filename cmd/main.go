@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
@@ -17,7 +17,7 @@ import (
 
 func main() {
 	// Load the html templates
-	config.LoadTemplates()
+	types.LoadTemplates()
 
 	// Set environment variables from the .env file
 	err := godotenv.Load()

@@ -12,7 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 )
 
 func (app *Application) HandleLogout(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func (app *Application) HandleLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) HandlePlaceOrder(w http.ResponseWriter, r *http.Request) {
-	claims, ok := r.Context().Value(config.UserObject).(*config.JWTtoken)
+	claims, ok := r.Context().Value(types.UserObject).(*types.JWTtoken)
 	if !ok {
 		http.Error(w, "Could not retrieve user claims", http.StatusInternalServerError)
 		return
@@ -45,7 +45,7 @@ func (app *Application) HandlePlaceOrder(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var order config.Order
+	var order types.Order
 	order.UserID = claims.ID
 	order.TableNumber, _ = strconv.Atoi(r.FormValue("tableNumber"))
 
@@ -56,7 +56,7 @@ func (app *Application) HandlePlaceOrder(w http.ResponseWriter, r *http.Request)
 	for i := 0; i < len(itemIDs); i++ {
 		itemID, _ := strconv.Atoi(itemIDs[i])
 		quantity, _ := strconv.Atoi(quantities[i])
-		order.Items = append(order.Items, config.OrderItem{
+		order.Items = append(order.Items, types.OrderItem{
 			ItemID:      itemID,
 			Quantity:    quantity,
 			Instruction: instructions[i],
@@ -150,7 +150,7 @@ func validatePaymentData(form url.Values) error {
 }
 
 func (app *Application) HandleGetPayment(w http.ResponseWriter, r *http.Request) {
-	claims, ok := r.Context().Value(config.UserObject).(*config.JWTtoken)
+	claims, ok := r.Context().Value(types.UserObject).(*types.JWTtoken)
 	if !ok {
 		http.Error(w, "Could not retrieve user claims", http.StatusInternalServerError)
 		return
@@ -170,13 +170,13 @@ func (app *Application) HandleGetPayment(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	pageData := config.PaymentPageData{
+	pageData := types.PaymentPageData{
 		Client: claims,
 		Order:  order,
 		Total:  total,
 	}
 
-	err = config.Templates.ExecuteTemplate(w, "payment.html", pageData)
+	err = types.Templates.ExecuteTemplate(w, "payment.html", pageData)
 	if err != nil {
 		log.Printf("Template execution error in HandleGetPayment: %v", err)
 		http.Error(w, "Failed to render the payment page.", http.StatusInternalServerError)
@@ -184,7 +184,7 @@ func (app *Application) HandleGetPayment(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *Application) HandlePostPayment(w http.ResponseWriter, r *http.Request) {
-	claims, ok := r.Context().Value(config.UserObject).(*config.JWTtoken)
+	claims, ok := r.Context().Value(types.UserObject).(*types.JWTtoken)
 	if !ok {
 		http.Error(w, "Could not retrieve user claims", http.StatusUnauthorized)
 		return
@@ -213,7 +213,7 @@ func (app *Application) HandlePostPayment(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	paymentDetails := &config.Payment{
+	paymentDetails := &types.Payment{
 		OrderID:       orderID,
 		UserID:        claims.ID,
 		Total:         total,

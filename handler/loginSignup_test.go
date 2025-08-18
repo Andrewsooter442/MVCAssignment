@@ -3,19 +3,19 @@ package handler
 import (
 	"testing"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 )
 
 func TestValidateLoginRequest(t *testing.T) {
 	testCases := []struct {
 		name        string
-		input       config.LoginRequest
+		input       types.LoginRequest
 		expectError bool
 		errorMsg    string
 	}{
 		{
 			name: "Valid Login",
-			input: config.LoginRequest{
+			input: types.LoginRequest{
 				Username: "testuser",
 				Password: "password123",
 			},
@@ -23,7 +23,7 @@ func TestValidateLoginRequest(t *testing.T) {
 		},
 		{
 			name: "Missing Username",
-			input: config.LoginRequest{
+			input: types.LoginRequest{
 				Password: "password123",
 			},
 			expectError: true,
@@ -31,7 +31,7 @@ func TestValidateLoginRequest(t *testing.T) {
 		},
 		{
 			name: "Missing Password",
-			input: config.LoginRequest{
+			input: types.LoginRequest{
 				Username: "testuser",
 			},
 			expectError: true,
@@ -59,13 +59,13 @@ func TestValidateLoginRequest(t *testing.T) {
 func TestValidateSignupRequest(t *testing.T) {
 	testCases := []struct {
 		name        string
-		input       config.SignupRequest
+		input       types.SignupRequest
 		expectError bool
 		errorMsg    string
 	}{
 		{
 			name: "Valid Signup",
-			input: config.SignupRequest{
+			input: types.SignupRequest{
 				Username: "newuser",
 				Password: "password123",
 				Email:    "test@example.com",
@@ -75,7 +75,7 @@ func TestValidateSignupRequest(t *testing.T) {
 		},
 		{
 			name: "Password Too Short",
-			input: config.SignupRequest{
+			input: types.SignupRequest{
 				Username: "newuser",
 				Password: "123",
 				Email:    "test@example.com",
@@ -86,7 +86,7 @@ func TestValidateSignupRequest(t *testing.T) {
 		},
 		{
 			name: "Invalid Email (No @)",
-			input: config.SignupRequest{
+			input: types.SignupRequest{
 				Username: "newuser",
 				Password: "password123",
 				Email:    "testexample.com",
@@ -97,7 +97,7 @@ func TestValidateSignupRequest(t *testing.T) {
 		},
 		{
 			name: "Invalid Phone (Too Short)",
-			input: config.SignupRequest{
+			input: types.SignupRequest{
 				Username: "newuser",
 				Password: "password123",
 				Email:    "test@example.com",
@@ -108,7 +108,7 @@ func TestValidateSignupRequest(t *testing.T) {
 		},
 		{
 			name: "Missing Username",
-			input: config.SignupRequest{
+			input: types.SignupRequest{
 				Password: "password123",
 				Email:    "test@example.com",
 				Phone:    "1234567890",

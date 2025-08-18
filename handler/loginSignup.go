@@ -11,10 +11,10 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 )
 
-func validateLoginRequest(req config.LoginRequest) error {
+func validateLoginRequest(req types.LoginRequest) error {
 	if req.Username == "" {
 		return errors.New("username is a required field")
 	}
@@ -27,7 +27,7 @@ func validateLoginRequest(req config.LoginRequest) error {
 	return nil
 }
 
-func validateSignupRequest(req config.SignupRequest) error {
+func validateSignupRequest(req types.SignupRequest) error {
 	if req.Username == "" {
 		return errors.New("username is a required field")
 	}
@@ -46,7 +46,7 @@ func validateSignupRequest(req config.SignupRequest) error {
 
 func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Request) {
 
-	data := config.LoginTemplate{
+	data := types.LoginTemplate{
 		InvalidCred:  false,
 		ErrorMessage: "",
 	}
@@ -59,14 +59,14 @@ func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		var req config.LoginRequest
+		var req types.LoginRequest
 		req.Username = r.FormValue("username")
 		req.Password = r.FormValue("password")
 
 		if err := validateLoginRequest(req); err != nil {
 			data.InvalidCred = true
 			data.ErrorMessage = err.Error()
-			err = config.Templates.ExecuteTemplate(w, "login.html", data)
+			err = types.Templates.ExecuteTemplate(w, "login.html", data)
 
 			if err != nil {
 				log.Printf("Error executing template: %v", err)
@@ -82,7 +82,7 @@ func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Reques
 		if err != nil {
 			data.InvalidCred = true
 			data.ErrorMessage = err.Error()
-			err = config.Templates.ExecuteTemplate(w, "login.html", data)
+			err = types.Templates.ExecuteTemplate(w, "login.html", data)
 			if err != nil {
 				log.Printf("Error executing template: %v", err)
 				http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
@@ -119,7 +119,7 @@ func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Reques
 		return
 	case "GET":
 
-		err := config.Templates.ExecuteTemplate(w, "login.html", data)
+		err := types.Templates.ExecuteTemplate(w, "login.html", data)
 		if err != nil {
 			log.Printf("Error executing template: %v", err)
 			http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
@@ -135,7 +135,7 @@ func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Reques
 
 func (app *Application) HandleSignupRequest(w http.ResponseWriter, r *http.Request) {
 
-	data := config.LoginTemplate{
+	data := types.LoginTemplate{
 		InvalidCred:  false,
 		ErrorMessage: "",
 	}
@@ -147,7 +147,7 @@ func (app *Application) HandleSignupRequest(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		var req config.SignupRequest
+		var req types.SignupRequest
 		req.Username = r.FormValue("username")
 		req.Password = r.FormValue("password")
 		req.Phone = r.FormValue("phone")
@@ -156,7 +156,7 @@ func (app *Application) HandleSignupRequest(w http.ResponseWriter, r *http.Reque
 		if err := validateSignupRequest(req); err != nil {
 			data.InvalidCred = true
 			data.ErrorMessage = err.Error()
-			err := config.Templates.ExecuteTemplate(w, "signup.html", data)
+			err := types.Templates.ExecuteTemplate(w, "signup.html", data)
 			if err != nil {
 				log.Printf("Error executing template: %v", err)
 				http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
@@ -168,7 +168,7 @@ func (app *Application) HandleSignupRequest(w http.ResponseWriter, r *http.Reque
 		if err := app.Pool.CreateNewUser(req); err != nil {
 			data.InvalidCred = true
 			data.ErrorMessage = err.Error()
-			err := config.Templates.ExecuteTemplate(w, "signup.html", data)
+			err := types.Templates.ExecuteTemplate(w, "signup.html", data)
 			if err != nil {
 				log.Printf("Error executing template: %v", err)
 				http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
@@ -180,7 +180,7 @@ func (app *Application) HandleSignupRequest(w http.ResponseWriter, r *http.Reque
 		return
 
 	case "GET":
-		err := config.Templates.ExecuteTemplate(w, "signup.html", data)
+		err := types.Templates.ExecuteTemplate(w, "signup.html", data)
 		if err != nil {
 			log.Printf("Error executing template: %v", err)
 			http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)

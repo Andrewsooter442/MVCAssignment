@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 )
 
 func (app *Application) HandleRootRequest(w http.ResponseWriter, r *http.Request) {
@@ -13,13 +13,13 @@ func (app *Application) HandleRootRequest(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	claims, ok := r.Context().Value(config.UserObject).(*config.JWTtoken)
+	claims, ok := r.Context().Value(types.UserObject).(*types.JWTtoken)
 	if !ok {
 		http.Error(w, "Authentication error", http.StatusUnauthorized)
 		return
 	}
 
-	client := config.Client{
+	client := types.Client{
 		Name:    claims.Name,
 		IsAdmin: claims.IsAdmin,
 		IsChef:  claims.IsCheff,
@@ -37,7 +37,7 @@ func (app *Application) HandleRootRequest(w http.ResponseWriter, r *http.Request
 			"Orders": orders,
 		}
 
-		err = config.Templates.ExecuteTemplate(w, "chefHome.html", pageData)
+		err = types.Templates.ExecuteTemplate(w, "chefHome.html", pageData)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(w, "Failed to render chef page", http.StatusInternalServerError)
@@ -63,21 +63,21 @@ func (app *Application) HandleRootRequest(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	menu := config.Menu{
+	menu := types.Menu{
 		Categories: allCategory,
 		Items:      allItems,
 	}
 
 	orderStatus := r.URL.Query().Get("status")
 
-	homePageData := config.HomePageData{
+	homePageData := types.HomePageData{
 		Client:        client,
 		Menu:          menu,
 		PendingOrders: allPendingOrders,
 		StatusMessage: orderStatus,
 	}
 
-	err = config.Templates.ExecuteTemplate(w, "home.html", homePageData)
+	err = types.Templates.ExecuteTemplate(w, "home.html", homePageData)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Failed to render page", http.StatusInternalServerError)

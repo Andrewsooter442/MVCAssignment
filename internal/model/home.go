@@ -2,7 +2,7 @@ package model
 
 import (
 	"database/sql"
-	"github.com/Andrewsooter442/MVCAssignment/config"
+	"github.com/Andrewsooter442/MVCAssignment/types"
 	"log"
 )
 
@@ -17,9 +17,9 @@ func (model *ModelConnection) GetItemPrice(itemId int) (float64, error) {
 	return price, nil
 }
 
-func (model *ModelConnection) GetOrderById(orderID int) (*config.Order, error) {
+func (model *ModelConnection) GetOrderById(orderID int) (*types.Order, error) {
 
-	var order config.Order
+	var order types.Order
 
 	orderQuery := `SELECT id, user_id, table_no, complete, created_at FROM orders WHERE id = ?`
 	err := model.DB.QueryRow(orderQuery, orderID).Scan(&order.ID, &order.UserID, &order.TableNumber, &order.Complete, &order.CreatedAt)
@@ -45,9 +45,9 @@ func (model *ModelConnection) GetOrderById(orderID int) (*config.Order, error) {
 	}
 	defer rows.Close()
 
-	var orderItems []config.OrderItem
+	var orderItems []types.OrderItem
 	for rows.Next() {
-		var item config.OrderItem
+		var item types.OrderItem
 		item.OrderID = orderID
 		if err := rows.Scan(&item.ItemID, &item.Name, &item.Quantity, &item.Instruction); err != nil {
 			log.Printf("Error scanning order item: %v", err)
@@ -67,7 +67,7 @@ func (model *ModelConnection) GetOrderById(orderID int) (*config.Order, error) {
 	return &order, nil
 }
 
-func (model *ModelConnection) GetIncompleteOrders() ([]config.Order, error) {
+func (model *ModelConnection) GetIncompleteOrders() ([]types.Order, error) {
 	ordersQuery := `SELECT id, user_id, table_no, created_at FROM orders WHERE complete = FALSE ORDER BY created_at ASC`
 	rows, err := model.DB.Query(ordersQuery)
 	if err != nil {
@@ -76,16 +76,16 @@ func (model *ModelConnection) GetIncompleteOrders() ([]config.Order, error) {
 	}
 	defer rows.Close()
 
-	orderMap := make(map[int]*config.Order)
-	var orderedList []*config.Order
+	orderMap := make(map[int]*types.Order)
+	var orderedList []*types.Order
 
 	for rows.Next() {
-		var order config.Order
+		var order types.Order
 		if err := rows.Scan(&order.ID, &order.UserID, &order.TableNumber, &order.CreatedAt); err != nil {
 			log.Printf("ChefView: Error scanning incomplete order: %v", err)
 			return nil, err
 		}
-		order.Items = []config.OrderItem{}
+		order.Items = []types.OrderItem{}
 		orderMap[order.ID] = &order
 		orderedList = append(orderedList, &order)
 	}
@@ -93,7 +93,7 @@ func (model *ModelConnection) GetIncompleteOrders() ([]config.Order, error) {
 		return nil, err
 	}
 	if len(orderMap) == 0 {
-		return []config.Order{}, nil
+		return []types.Order{}, nil
 	}
 
 	itemsQuery := `
@@ -110,7 +110,7 @@ func (model *ModelConnection) GetIncompleteOrders() ([]config.Order, error) {
 	defer itemRows.Close()
 
 	for itemRows.Next() {
-		var item config.OrderItem
+		var item types.OrderItem
 		if err := itemRows.Scan(&item.OrderID, &item.ItemID, &item.Name, &item.Quantity, &item.Instruction); err != nil {
 			log.Printf("ChefView: Error scanning order item: %v", err)
 			return nil, err
@@ -124,7 +124,7 @@ func (model *ModelConnection) GetIncompleteOrders() ([]config.Order, error) {
 		return nil, err
 	}
 
-	finalOrders := make([]config.Order, 0, len(orderedList))
+	finalOrders := make([]types.Order, 0, len(orderedList))
 	for _, orderPtr := range orderedList {
 		if len(orderPtr.Items) > 0 {
 			finalOrders = append(finalOrders, *orderPtr)

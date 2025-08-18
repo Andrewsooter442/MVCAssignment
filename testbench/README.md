@@ -1,3 +1,4 @@
+**If you didn't change the JWT secret. **
 
 **Adming JWT: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiTmFtZSI6ImFkbWluIiwiSXNBZG1pbiI6dHJ1ZSwiSXNDaGVmZiI6ZmFsc2UsImlzcyI6ImtpdGNoZW4tYXBwIiwiZXhwIjoxNzU1NTQxMjU5fQ.gvNc02q8qq5cLuaARp6CF8MOcCiyigldXz-Mb8yOl5c**
 
