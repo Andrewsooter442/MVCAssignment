@@ -44,151 +44,135 @@ func validateSignupRequest(req types.SignupRequest) error {
 	return nil
 }
 
-func (app *Application) HandleLoginRequest(w http.ResponseWriter, r *http.Request) {
-
+func (app *Application) HandleLoginGet(w http.ResponseWriter, r *http.Request) {
 	data := types.LoginTemplate{
 		InvalidCred:  false,
 		ErrorMessage: "",
 	}
 
-	switch r.Method {
-	case "POST":
+	err := types.Templates.ExecuteTemplate(w, "login.html", data)
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
+	}
+}
 
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Failed to parse form data", http.StatusBadRequest)
-			return
-		}
+func (app *Application) HandleLoginPost(w http.ResponseWriter, r *http.Request) {
+	data := types.LoginTemplate{
+		InvalidCred:  false,
+		ErrorMessage: "",
+	}
 
-		var req types.LoginRequest
-		req.Username = r.FormValue("username")
-		req.Password = r.FormValue("password")
-
-		if err := validateLoginRequest(req); err != nil {
-			data.InvalidCred = true
-			data.ErrorMessage = err.Error()
-			err = types.Templates.ExecuteTemplate(w, "login.html", data)
-
-			if err != nil {
-				log.Printf("Error executing template: %v", err)
-				http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
-			}
-			return
-		}
-
-		fmt.Println("Login attempt for:", req.Username)
-
-		// Create a JWT token
-		token, err := app.Pool.AuthenticateUser(req)
-		if err != nil {
-			data.InvalidCred = true
-			data.ErrorMessage = err.Error()
-			err = types.Templates.ExecuteTemplate(w, "login.html", data)
-			if err != nil {
-				log.Printf("Error executing template: %v", err)
-				http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
-			}
-			return
-		}
-
-		jwtSecret := os.Getenv("JWT_SECRET")
-		jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, token)
-		signedString, err := jwtToken.SignedString([]byte(jwtSecret))
-		if err != nil {
-			fmt.Println(err)
-			http.Error(w, "Failed to create new token", http.StatusBadRequest)
-			return
-		}
-
-		//Send the cookie
-		expirationTime := time.Now().Add(24 * time.Hour)
-		cookie := http.Cookie{
-			Name:    "token",
-			Value:   signedString,
-			Expires: expirationTime,
-
-			HttpOnly: true,
-			Secure:   false,
-			Path:     "/",
-		}
-
-		fmt.Println("Cookie:", cookie)
-
-		http.SetCookie(w, &cookie)
-
-		http.Redirect(w, r, "/", http.StatusFound)
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
 		return
-	case "GET":
+	}
 
-		err := types.Templates.ExecuteTemplate(w, "login.html", data)
+	var req types.LoginRequest
+	req.Username = r.FormValue("username")
+	req.Password = r.FormValue("password")
+
+	if err := validateLoginRequest(req); err != nil {
+		data.InvalidCred = true
+		data.ErrorMessage = err.Error()
+		err = types.Templates.ExecuteTemplate(w, "login.html", data)
 		if err != nil {
 			log.Printf("Error executing template: %v", err)
 			http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
 		}
 		return
+	}
 
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	fmt.Println("Login attempt for:", req.Username)
+
+	token, err := app.Pool.AuthenticateUser(req)
+	if err != nil {
+		data.InvalidCred = true
+		data.ErrorMessage = err.Error()
+		err = types.Templates.ExecuteTemplate(w, "login.html", data)
+		if err != nil {
+			log.Printf("Error executing template: %v", err)
+			http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
+		}
 		return
 	}
 
+	jwtSecret := os.Getenv("JWT_SECRET")
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, token)
+	signedString, err := jwtToken.SignedString([]byte(jwtSecret))
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Failed to create new token", http.StatusBadRequest)
+		return
+	}
+
+	expirationTime := time.Now().Add(24 * time.Hour)
+	cookie := http.Cookie{
+		Name:     "token",
+		Value:    signedString,
+		Expires:  expirationTime,
+		HttpOnly: true,
+		Secure:   false,
+		Path:     "/",
+	}
+
+	fmt.Println("Cookie:", cookie)
+	http.SetCookie(w, &cookie)
+
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-func (app *Application) HandleSignupRequest(w http.ResponseWriter, r *http.Request) {
-
+func (app *Application) HandleSignupGet(w http.ResponseWriter, r *http.Request) {
 	data := types.LoginTemplate{
 		InvalidCred:  false,
 		ErrorMessage: "",
 	}
 
-	switch r.Method {
-	case "POST":
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Failed to parse form data", http.StatusBadRequest)
-			return
-		}
+	err := types.Templates.ExecuteTemplate(w, "signup.html", data)
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "There was a problem rendering the signup page.", http.StatusInternalServerError)
+	}
+}
 
-		var req types.SignupRequest
-		req.Username = r.FormValue("username")
-		req.Password = r.FormValue("password")
-		req.Phone = r.FormValue("phone")
-		req.Email = r.FormValue("email")
+func (app *Application) HandleSignupPost(w http.ResponseWriter, r *http.Request) {
+	data := types.LoginTemplate{
+		InvalidCred:  false,
+		ErrorMessage: "",
+	}
 
-		if err := validateSignupRequest(req); err != nil {
-			data.InvalidCred = true
-			data.ErrorMessage = err.Error()
-			err := types.Templates.ExecuteTemplate(w, "signup.html", data)
-			if err != nil {
-				log.Printf("Error executing template: %v", err)
-				http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
-			}
-			return
-
-		}
-
-		if err := app.Pool.CreateNewUser(req); err != nil {
-			data.InvalidCred = true
-			data.ErrorMessage = err.Error()
-			err := types.Templates.ExecuteTemplate(w, "signup.html", data)
-			if err != nil {
-				log.Printf("Error executing template: %v", err)
-				http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
-			}
-			return
-		}
-
-		http.Redirect(w, r, "/", http.StatusFound)
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
 		return
+	}
 
-	case "GET":
+	var req types.SignupRequest
+	req.Username = r.FormValue("username")
+	req.Password = r.FormValue("password")
+	req.Phone = r.FormValue("phone")
+	req.Email = r.FormValue("email")
+
+	if err := validateSignupRequest(req); err != nil {
+		data.InvalidCred = true
+		data.ErrorMessage = err.Error()
 		err := types.Templates.ExecuteTemplate(w, "signup.html", data)
 		if err != nil {
 			log.Printf("Error executing template: %v", err)
-			http.Error(w, "There was a problem rendering the login page.", http.StatusInternalServerError)
+			http.Error(w, "There was a problem rendering the signup page.", http.StatusInternalServerError)
 		}
 		return
+	}
 
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	if err := app.Pool.CreateNewUser(req); err != nil {
+		data.InvalidCred = true
+		data.ErrorMessage = err.Error()
+		err := types.Templates.ExecuteTemplate(w, "signup.html", data)
+		if err != nil {
+			log.Printf("Error executing template: %v", err)
+			http.Error(w, "There was a problem rendering the signup page.", http.StatusInternalServerError)
+		}
 		return
 	}
+
+	http.Redirect(w, r, "/", http.StatusFound)
 }

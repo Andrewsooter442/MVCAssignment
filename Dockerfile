@@ -16,7 +16,6 @@ WORKDIR /app
 
 COPY --from=builder /app/main .
 
-COPY config.yaml .
 COPY internal/view ./internal/view
 COPY static ./static
 COPY migrations ./migrations

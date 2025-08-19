@@ -11,9 +11,17 @@ import (
 
 func registerRoutes(mainMux *http.ServeMux, app *handler.Application) {
 
-	mainMux.Handle("/", middleware.VerifyJWT(http.HandlerFunc(app.HandleRootRequest)))
-	mainMux.Handle("/login", (http.HandlerFunc(app.HandleLoginRequest)))
-	mainMux.Handle("/signup", (http.HandlerFunc(app.HandleSignupRequest)))
+	newRouter := mux.NewRouter()
+
+	newRouter.Handle("/", middleware.VerifyJWT(http.HandlerFunc(app.HandleRootRequest)))
+
+	newRouter.HandleFunc("/login", app.HandleLoginGet).Methods("GET")
+	newRouter.HandleFunc("/login", app.HandleLoginPost).Methods("POST")
+
+	newRouter.HandleFunc("/signup", app.HandleSignupGet).Methods("GET")
+	newRouter.HandleFunc("/signup", app.HandleSignupPost).Methods("POST")
+
+	mainMux.Handle("/", newRouter)
 
 	// Admin routes
 	adminRouter := mux.NewRouter()
@@ -45,7 +53,7 @@ func registerRoutes(mainMux *http.ServeMux, app *handler.Application) {
 	apiSubrouter.HandleFunc("/payment", app.HandlePostPayment).Methods("POST")
 
 	// For chef
-	apiSubrouter.HandleFunc("/completeOrder", app.HandleCompleteOrderItem).Methods("POST")
+	apiSubrouter.Handle("/completeOrder", middleware.CheckChef(http.HandlerFunc(app.HandleCompleteOrderItem))).Methods("POST")
 
 	mainMux.Handle("/api/", apiRouter)
 }
