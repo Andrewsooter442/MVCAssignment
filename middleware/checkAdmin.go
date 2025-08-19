@@ -2,8 +2,9 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/Andrewsooter442/MVCAssignment/types"
 	"net/http"
+
+	"github.com/Andrewsooter442/MVCAssignment/types"
 )
 
 func CheckAdmin(next http.Handler) http.Handler {

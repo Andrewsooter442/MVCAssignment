@@ -2,8 +2,9 @@ package model
 
 import (
 	"database/sql"
-	"github.com/Andrewsooter442/MVCAssignment/types"
 	"log"
+
+	"github.com/Andrewsooter442/MVCAssignment/types"
 )
 
 func (model *ModelConnection) GetItemPrice(itemId int) (float64, error) {
@@ -53,7 +54,7 @@ func (model *ModelConnection) GetOrderById(orderID int) (*types.Order, error) {
 			log.Printf("Error scanning order item: %v", err)
 			return nil, err
 		}
-		item.Price, err = model.GetItemPrice(item.ItemID)
+		item.Price, _ = model.GetItemPrice(item.ItemID)
 		orderItems = append(orderItems, item)
 	}
 

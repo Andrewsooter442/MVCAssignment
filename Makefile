@@ -1,108 +1,133 @@
+include .env
+export
+
 GO := go
 GOPATH := $(shell go env GOPATH)
 GOPATH_BIN := $(GOPATH)/bin
-GOLANGCI_LINT := $(GOPATH_BIN)/golangci-lint
 SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
-GOIMPORTS := $(GOPATH_BIN)/goimports
 GO_PACKAGES = $(shell go list ./... | grep -v vendor)
-PACKAGE_BASE := github.com/Andrewsooter442/MVCAssignment
-
-DB_HOST = $(shell grep -A6 "^db:" config.yaml | grep "host:" | head -1 | cut -d'"' -f2)
-DB_PORT = $(shell grep -A6 "^db:" config.yaml | grep "port:" | head -1 | awk '{print $$2}')
-DB_USER = $(shell grep -A6 "^db:" config.yaml | grep "user:" | head -1 | cut -d'"' -f2)
-DB_PASS = $(shell grep -A6 "^db:" config.yaml | grep "password:" | head -1 | cut -d'"' -f2)
-DB_NAME = $(shell grep -A6 "^db:" config.yaml | grep "db_name:" | head -1 | cut -d'"' -f2)
-
-DB_INIT_FILE= migrations/000001_create_database.up.sql
-CREATE_TABLES= migrations/000002_create_users_table.up.sql
-CREATE_MENU=migrations/000004_create_users_table.up.sql
-MAKE_ADMIN=migrations/000003_create_users_table.up.sql
+PACKAGE_BASE := $(shell head -n 1 go.mod | awk '{print $$2}')
 
 
-DOWN_MIGRATION_FILE = migrations/000001_init_schema.down.sql
+MIGRATE := $(GOPATH_BIN)/migrate
+GOLANGCI_LINT := $(GOPATH_BIN)/golangci-lint
+GOIMPORTS := $(GOPATH_BIN)/goimports
+AIR := $(GOPATH_BIN)/air
 
-.PHONY: help vendor build run dev lint format clean
+
+DB_URL = "mysql://$(DB_USER):$(DB_PASS)@tcp($(DB_HOST):$(DB_PORT))/$(DB_NAME)?multiStatements=true"
+MIGRATIONS_PATH = "migrations"
+
+
+.PHONY: help vendor build run dev lint format clean verify verify-format \
+        install-golangci-lint install-goimports install-air install-migrate-cli \
+        migrate-create migrate-up migrate-down migrate-down-all migrate-to migrate-status
+
 
 help:
-	@echo "MVCAssignment make help"
+	@echo "Application Makefile"
 	@echo ""
-	@echo "vendor: Downloads the dependencies in the vendor folder"
-	@echo "build: Builds the binary of the server"
-	@echo "run: Runs the binary of the server"
-	@echo "dev: Combines build and run commands"
-	@echo "lint: Lints the code using vet and golangci-lint"
-	@echo "format: Formats the code using fmt and golangci-lint"
-	@echo "clean: Removes the vendor directory and binary"
+	@echo "---- Application ----"
+	@echo "vendor: Downloads Go module dependencies."
+	@echo "build:  Builds the application binary."
+	@echo "run:    Runs the built binary."
+	@echo "dev:    Runs the app with live-reloading using Air."
+	@echo "clean:  Removes the binary and vendor directory."
+	@echo ""
+	@echo "---- Quality & Formatting ----"
+	@echo "lint:   Lints the code for potential issues."
+	@echo "format: Formats the Go source code."
+	@echo "verify: Runs both format verification and linting."
+	@echo ""
+	@echo "---- Database Migrations ----"
+	@echo "migrate-create: Creates new up/down migration files."
+	@echo "migrate-up:     Applies all pending migrations."
+	@echo "migrate-down:   Rolls back the last applied migration."
+	@echo "migrate-down-all: Rolls back all migrations."
+	@echo "migrate-to version=<version_num>: Migrates to a specific version."
+	@echo "migrate-status: Shows the current migration status."
+
 
 vendor:
 	@${GO} mod tidy
 	@${GO} mod vendor
-	@echo "Vendor downloaded successfully"
+	@echo "Vendor directory created successfully."
 
 build:
 	@${GO} build -o mvcassignment ./cmd/
-	@echo "Binary built successfully"
+	@echo "Binary built successfully."
 
 run:
 	@./mvcassignment
 
-dev:
-	@$(GOPATH_BIN)/air -c .air.toml
-
-install-golangci-lint:
-	@echo "=====> Installing golangci-lint..."
-	@curl -sSfL \
-	 	https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
-	 	sh -s -- -b $(GOPATH_BIN)  v1.64.8
-
-lint: install-golangci-lint
-	@$(GO) vet $(GO_PACKAGES)
-	@$(GOLANGCI_LINT) run -c golangci.yaml
-	@echo "Lint successful"
-
-install-goimports:
-	@echo "=====> Installing formatter..."
-	@$(GO) install golang.org/x/tools/cmd/goimports@latest
-
-format: install-goimports
-	@echo "=====> Formatting code..."
-	@$(GOIMPORTS) -l -w -local ${PACKAGE_BASE} $(SRC)
-	@echo "Format successful"
-
-## verify: Run format and lint checks
-verify: verify-format lint
-
-## verify-format: Verify the format
-verify-format: install-goimports
-	@echo "=====> Verifying format..."
-	$(if $(shell $(GOIMPORTS) -l -local ${PACKAGE_BASE} ${SRC}), @echo ERROR: Format verification failed! && $(GOIMPORTS) -l -local ${PACKAGE_BASE} ${SRC} && exit 1)
+dev: install-air
+	@$(AIR) -c .air.toml
 
 clean:
 	@rm -f mvcassignment
 	@rm -rf vendor/
-	@echo "Clean successful"
+	@echo "Clean successful."
+
+
+lint: install-golangci-lint
+	@$(GO) vet $(GO_PACKAGES)
+	@$(GOLANGCI_LINT) run -c golangci.yaml
+	@echo "Lint successful."
+
+format: install-goimports
+	@echo "=====> Formatting code..."
+	@$(GOIMPORTS) -l -w -local ${PACKAGE_BASE} $(SRC)
+	@echo "Format successful."
+
+verify: verify-format lint
+
+verify-format: install-goimports
+	@echo "=====> Verifying format..."
+	$(if $(shell $(GOIMPORTS) -l -local ${PACKAGE_BASE} ${SRC}), @echo "ERROR: Code is not formatted. Please run 'make format'." && exit 1)
+	@echo "Format verification successful."
+
+
+install-golangci-lint:
+	@command -v $(GOLANGCI_LINT) >/dev/null 2>&1 || \
+		(echo "=====> Installing golangci-lint..." && \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH_BIN) v1.55.2)
+
+install-goimports:
+	@command -v $(GOIMPORTS) >/dev/null 2>&1 || \
+		(echo "=====> Installing goimports..." && \
+		$(GO) install golang.org/x/tools/cmd/goimports@latest)
 
 install-air:
-	@echo "Make sure your GOPATH and GOPATH_BIN is set"
-	@curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(GOPATH_BIN)
-	@echo "Air installed successfully"	
+	@command -v $(AIR) >/dev/null 2>&1 || \
+		(echo "=====> Installing Air for live-reloading..." && \
+		curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(GOPATH_BIN))
 
-apply-migration:
-	@echo "Applying migration..."
-	@echo "DB_HOST: $(DB_HOST)"
-	@echo "DB_PORT: $(DB_PORT)"
-	@echo "DB_USER: $(DB_USER)"
-	@echo "DB_NAME: $(DB_NAME)"
+install-migrate-cli:
+	@command -v $(MIGRATE) >/dev/null 2>&1 || \
+		(echo "=====> Installing golang-migrate/migrate CLI..." && \
+		go install -tags 'mysql' github.com/golang-migrate/migrate/v4/cmd/migrate@latest)
 
-	mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS)  < $(DB_INIT_FILE)
-	mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < $(CREATE_TABLES)
-	mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < $(CREATE_MENU)
 
-create-admin:
-	@echo "Creating Admin and Chef users..."
-	@echo "DB_HOST: $(DB_HOST)"
-	@echo "DB_PORT: $(DB_PORT)"
-	@echo "DB_USER: $(DB_USER)"
-	@echo "DB_NAME: $(DB_NAME)"
+migrate-create:
+	@read -p "Enter migration name (e.g., add_price_to_items): " name; \
+	$(MIGRATE) create -ext sql -dir $(MIGRATIONS_PATH) -seq $$name
 
-	mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < $(MAKE_ADMIN)
+migrate-up: install-migrate-cli
+	@echo "Applying all up migrations..."
+	@$(MIGRATE) -path $(MIGRATIONS_PATH) -database $(DB_URL) -verbose up
+
+migrate-down: install-migrate-cli
+	@echo "Rolling back last migration..."
+	@$(MIGRATE) -path $(MIGRATIONS_PATH) -database $(DB_URL) -verbose down 1
+
+migrate-down-all: install-migrate-cli
+	@echo "Rolling back all migrations..."
+	@$(MIGRATE) -path $(MIGRATIONS_PATH) -database $(DB_URL) -verbose down -all
+
+migrate-to: install-migrate-cli
+	@echo "Migrating to version $(version)..."
+	@$(MIGRATE) -path $(MIGRATIONS_PATH) -database $(DB_URL) -verbose goto $(version)
+
+migrate-status: install-migrate-cli
+	@echo "Checking migration status..."
+	@$(MIGRATE) -path $(MIGRATIONS_PATH) -database $(DB_URL) -verbose version

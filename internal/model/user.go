@@ -3,6 +3,7 @@ package model
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -66,8 +67,7 @@ func (model *ModelConnection) GetUserNameById(id int) string {
 	var name string
 	err := row.Scan(&name)
 	if err != nil {
-		if err == sql.ErrNoRows {
-		}
+		fmt.Println(err)
 	}
 	return name
 }
